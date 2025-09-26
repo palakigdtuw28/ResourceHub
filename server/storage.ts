@@ -21,20 +21,25 @@ const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
+  getUserById(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, user: Partial<InsertUser>): Promise<User>;
+  updateUserPassword(id: string, hashedPassword: string): Promise<void>;
 
   getSubjects(year: number, semester: number, branch?: string): Promise<Subject[]>;
   getSubject(id: string): Promise<Subject | undefined>;
   createSubject(subject: InsertSubject): Promise<Subject>;
+  updateSubject(id: string, updateData: Partial<InsertSubject>): Promise<Subject | undefined>;
+  deleteSubject(id: string): Promise<boolean>;
 
   getResources(subjectId: string, resourceType?: string): Promise<Resource[]>;
   getResource(id: string): Promise<Resource | undefined>;
   createResource(resource: InsertResource): Promise<Resource>;
   getUserResources(userId: string): Promise<Resource[]>;
   incrementDownloadCount(resourceId: string): Promise<void>;
+  deleteResource(id: string): Promise<void>;
 
   createDownload(download: InsertDownload): Promise<Download>;
   getUserDownloads(userId: string): Promise<Download[]>;
@@ -78,13 +83,24 @@ export class DatabaseStorage implements IStorage {
   async updateUser(id: string, updateData: Partial<InsertUser>): Promise<User> {
     const [user] = await db
       .update(users)
-      .set({ ...updateData, updatedAt: new Date() })
+      .set({ ...updateData, updatedAt: new Date().toISOString() })
       .where(eq(users.id, id))
       .returning();
     return user;
   }
 
-  async getSubjects(year: number, semester: number, branch = "Computer Science"): Promise<Subject[]> {
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.getUser(id); // Reuse existing getUser method
+  }
+
+  async updateUserPassword(id: string, hashedPassword: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ password: hashedPassword, updatedAt: new Date().toISOString() })
+      .where(eq(users.id, id));
+  }
+
+  async getSubjects(year: number, semester: number, branch = "CSE"): Promise<Subject[]> {
     return await db
       .select()
       .from(subjects)
@@ -106,6 +122,29 @@ export class DatabaseStorage implements IStorage {
       .values(subject)
       .returning();
     return newSubject;
+  }
+
+  async updateSubject(id: string, updateData: Partial<InsertSubject>): Promise<Subject | undefined> {
+    const [updatedSubject] = await db
+      .update(subjects)
+      .set(updateData)
+      .where(eq(subjects.id, id))
+      .returning();
+    return updatedSubject;
+  }
+
+  async deleteSubject(id: string): Promise<boolean> {
+    try {
+      console.log("Attempting to delete subject with ID:", id);
+      const result = await db
+        .delete(subjects)
+        .where(eq(subjects.id, id));
+      console.log("Delete result:", result);
+      return result.changes > 0;
+    } catch (error) {
+      console.error("Error in deleteSubject:", error);
+      throw error;
+    }
   }
 
   async getResources(subjectId: string, resourceType?: string): Promise<Resource[]> {
@@ -159,6 +198,12 @@ export class DatabaseStorage implements IStorage {
       .where(eq(resources.id, resourceId));
   }
 
+  async deleteResource(id: string): Promise<void> {
+    await db
+      .delete(resources)
+      .where(eq(resources.id, id));
+  }
+
   async createDownload(download: InsertDownload): Promise<Download> {
     const [newDownload] = await db
       .insert(downloads)
@@ -199,6 +244,8 @@ export class DatabaseStorage implements IStorage {
       totalDownloads: totalDownloadsResult.total || 0,
     };
   }
+
+
 }
 
 export const storage = new DatabaseStorage();

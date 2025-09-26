@@ -1,6 +1,136 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production build
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database files (commented out to include sample database)
+# *.db
+# *.db-shm
+# *.db-wal
+# *.sqlite
+# *.sqlite3
+
+# Note: Database is included for demo purposes
+# In production, use environment-specific databases
+
+# Uploads directory
+uploads/
+public/uploads/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
 .DS_Store
-server/public
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Build artifacts
+*.tsbuildinfo
+
+# Development tools
+.replit
+.config/
+.local/
+
+# Testing
+coverage/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# ESLint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Admin setup scripts (keep these local only)
+add-admin.*
+reset-admin-password.*
+seed-*.js
+seed-*.ts
+check-*.js
+check-*.ts
+open-clean-*.*
+
+# Local development files
+campusvault-local.html
+replit.md
+
+# Docker volumes and data
+data/
+uploads/
+
+# Docker environment files
+.env.production
+
+# Vite specific
 vite.config.ts.*
 *.tar.gz

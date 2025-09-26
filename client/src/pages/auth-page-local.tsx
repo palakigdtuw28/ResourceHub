@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-local";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,33 +8,29 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertUserSchema } from "@shared/schema";
-import { z } from "zod";
 
-const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
-});
+interface LoginFormData {
+  username: string;
+  password: string;
+}
 
-const registerSchema = insertUserSchema.extend({
-  confirmPassword: z.string().min(1, "Please confirm your password"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+interface RegisterFormData {
+  username: string;
+  email: string;
+  fullName: string;
+  password: string;
+  confirmPassword: string;
+  year: number;
+  branch: string;
+}
 
-type LoginFormData = z.infer<typeof loginSchema>;
-type RegisterFormData = z.infer<typeof registerSchema>;
-
-export default function AuthPage() {
+export default function AuthPageLocal() {
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const { user, loginMutation, registerMutation } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const loginForm = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
       password: "",
@@ -42,7 +38,6 @@ export default function AuthPage() {
   });
 
   const registerForm = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
       email: "",
@@ -64,6 +59,15 @@ export default function AuthPage() {
   };
 
   const onRegister = async (data: RegisterFormData) => {
+    if (data.password !== data.confirmPassword) {
+      toast({
+        title: "Password mismatch",
+        description: "Passwords don't match",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { confirmPassword, ...registerData } = data;
       await registerMutation.mutateAsync(registerData);
@@ -73,7 +77,7 @@ export default function AuthPage() {
     }
   };
 
-  // Redirect if already logged in (after all hooks are called)
+  // Redirect if already logged in
   if (user) {
     setTimeout(() => setLocation("/"), 0);
     return null;
@@ -85,9 +89,10 @@ export default function AuthPage() {
         <CardContent className="p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-primary mb-2" data-testid="text-app-title">
-              ResourceHub
+              ResourceHub Local
             </h1>
-            <p className="text-muted-foreground">Your College Resource Hub</p>
+            <p className="text-muted-foreground">Your Offline Resource Hub</p>
+            <p className="text-xs text-muted-foreground mt-2">No server required - all data stored locally!</p>
           </div>
           
           <div className="mb-6">
@@ -118,46 +123,41 @@ export default function AuthPage() {
           </div>
 
           {activeTab === "login" ? (
-            <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4" data-testid="form-login">
-              <div>
-                <Label htmlFor="login-username">Username</Label>
-                <Input
-                  id="login-username"
-                  type="text"
-                  placeholder="your.username"
-                  {...loginForm.register("username")}
-                  data-testid="input-login-username"
-                />
-                {loginForm.formState.errors.username && (
-                  <p className="text-sm text-destructive mt-1" data-testid="error-login-username">
-                    {loginForm.formState.errors.username.message}
+            <div>
+              <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4" data-testid="form-login">
+                <div>
+                  <Label htmlFor="login-username">Username</Label>
+                  <Input
+                    id="login-username"
+                    type="text"
+                    placeholder="admin"
+                    {...loginForm.register("username")}
+                    data-testid="input-login-username"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="login-password">Password</Label>
+                  <Input
+                    id="login-password"
+                    type="password"
+                    placeholder="any password"
+                    {...loginForm.register("password")}
+                    data-testid="input-login-password"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Demo: Use "admin" as username, any password works
                   </p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="login-password">Password</Label>
-                <Input
-                  id="login-password"
-                  type="password"
-                  placeholder="••••••••"
-                  {...loginForm.register("password")}
-                  data-testid="input-login-password"
-                />
-                {loginForm.formState.errors.password && (
-                  <p className="text-sm text-destructive mt-1" data-testid="error-login-password">
-                    {loginForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loginMutation.isPending}
-                data-testid="button-login-submit"
-              >
-                {loginMutation.isPending ? "Logging in..." : "Login"}
-              </Button>
-            </form>
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={loginMutation.isPending}
+                  data-testid="button-login-submit"
+                >
+                  {loginMutation.isPending ? "Logging in..." : "Login"}
+                </Button>
+              </form>
+            </div>
           ) : (
             <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4" data-testid="form-register">
               <div>
@@ -169,11 +169,6 @@ export default function AuthPage() {
                   {...registerForm.register("fullName")}
                   data-testid="input-register-fullname"
                 />
-                {registerForm.formState.errors.fullName && (
-                  <p className="text-sm text-destructive mt-1" data-testid="error-register-fullname">
-                    {registerForm.formState.errors.fullName.message}
-                  </p>
-                )}
               </div>
               <div>
                 <Label htmlFor="register-username">Username</Label>
@@ -184,11 +179,6 @@ export default function AuthPage() {
                   {...registerForm.register("username")}
                   data-testid="input-register-username"
                 />
-                {registerForm.formState.errors.username && (
-                  <p className="text-sm text-destructive mt-1" data-testid="error-register-username">
-                    {registerForm.formState.errors.username.message}
-                  </p>
-                )}
               </div>
               <div>
                 <Label htmlFor="register-email">Email</Label>
@@ -199,11 +189,6 @@ export default function AuthPage() {
                   {...registerForm.register("email")}
                   data-testid="input-register-email"
                 />
-                {registerForm.formState.errors.email && (
-                  <p className="text-sm text-destructive mt-1" data-testid="error-register-email">
-                    {registerForm.formState.errors.email.message}
-                  </p>
-                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -219,11 +204,6 @@ export default function AuthPage() {
                       <SelectItem value="4">4th Year</SelectItem>
                     </SelectContent>
                   </Select>
-                  {registerForm.formState.errors.year && (
-                    <p className="text-sm text-destructive mt-1" data-testid="error-register-year">
-                      {registerForm.formState.errors.year.message}
-                    </p>
-                  )}
                 </div>
                 <div>
                   <Label htmlFor="register-branch">Branch</Label>
@@ -239,11 +219,6 @@ export default function AuthPage() {
                       <SelectItem value="MAE">Mechanical & Automation Engineering (MAE)</SelectItem>
                     </SelectContent>
                   </Select>
-                  {registerForm.formState.errors.branch && (
-                    <p className="text-sm text-destructive mt-1" data-testid="error-register-branch">
-                      {registerForm.formState.errors.branch.message}
-                    </p>
-                  )}
                 </div>
               </div>
               <div>
@@ -255,11 +230,6 @@ export default function AuthPage() {
                   {...registerForm.register("password")}
                   data-testid="input-register-password"
                 />
-                {registerForm.formState.errors.password && (
-                  <p className="text-sm text-destructive mt-1" data-testid="error-register-password">
-                    {registerForm.formState.errors.password.message}
-                  </p>
-                )}
               </div>
               <div>
                 <Label htmlFor="register-confirmPassword">Confirm Password</Label>
@@ -270,11 +240,6 @@ export default function AuthPage() {
                   {...registerForm.register("confirmPassword")}
                   data-testid="input-register-confirm-password"
                 />
-                {registerForm.formState.errors.confirmPassword && (
-                  <p className="text-sm text-destructive mt-1" data-testid="error-register-confirm-password">
-                    {registerForm.formState.errors.confirmPassword.message}
-                  </p>
-                )}
               </div>
               <Button 
                 type="submit" 
@@ -286,6 +251,16 @@ export default function AuthPage() {
               </Button>
             </form>
           )}
+
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="text-sm font-medium text-blue-800 mb-2">🚀 Local Mode Features:</h4>
+            <ul className="text-xs text-blue-700 space-y-1">
+              <li>• No server required - runs entirely in your browser</li>
+              <li>• All data stored in browser's local storage</li>
+              <li>• File uploads work with base64 encoding</li>
+              <li>• Perfect for offline usage and demos</li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
     </div>

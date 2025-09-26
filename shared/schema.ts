@@ -1,53 +1,54 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   fullName: text("full_name").notNull(),
   year: integer("year").notNull(), // 1, 2, 3, 4
-  branch: text("branch").notNull().default("Computer Science"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  branch: text("branch").notNull().default("CSE"),
+  isAdmin: integer("is_admin", { mode: 'boolean' }).default(false),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const subjects = pgTable("subjects", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const subjects = sqliteTable("subjects", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   code: text("code").notNull(),
   year: integer("year").notNull(),
   semester: integer("semester").notNull(), // 1 or 2
-  branch: text("branch").notNull().default("Computer Science"),
+  branch: text("branch").notNull().default("CSE"),
   icon: text("icon").default("fas fa-book"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const resources = pgTable("resources", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const resources = sqliteTable("resources", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   title: text("title").notNull(),
   description: text("description"),
   fileName: text("file_name").notNull(),
   fileSize: integer("file_size").notNull(), // in bytes
   fileType: text("file_type").notNull(), // pdf, doc, etc.
   resourceType: text("resource_type").notNull(), // notes, pyqs, assignments, etc.
-  subjectId: varchar("subject_id").notNull().references(() => subjects.id),
-  uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
+  subjectId: text("subject_id").notNull().references(() => subjects.id),
+  uploadedBy: text("uploaded_by").notNull().references(() => users.id),
   downloadCount: integer("download_count").default(0),
-  isApproved: boolean("is_approved").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  isApproved: integer("is_approved", { mode: 'boolean' }).default(true),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const downloads = pgTable("downloads", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  resourceId: varchar("resource_id").notNull().references(() => resources.id),
-  downloadedAt: timestamp("downloaded_at").defaultNow(),
+export const downloads = sqliteTable("downloads", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull().references(() => users.id),
+  resourceId: text("resource_id").notNull().references(() => resources.id),
+  downloadedAt: text("downloaded_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 // Relations

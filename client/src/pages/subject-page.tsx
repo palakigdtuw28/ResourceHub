@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
-import { Home, ChevronRight, FileText, HelpCircle, Download, Plus } from "lucide-react";
+import { Home, ChevronRight, FileText, HelpCircle, Download } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -14,7 +14,17 @@ export default function SubjectPage() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const { data: subject, isLoading: subjectLoading } = useQuery({
+  type Subject = {
+    id: string;
+    name: string;
+    code: string;
+    year: number;
+    semester: number;
+    icon?: string;
+    // add other properties as needed
+  };
+
+  const { data: subject, isLoading: subjectLoading } = useQuery<Subject>({
     queryKey: ["/api/subject", subjectId],
     enabled: !!subjectId,
   });
@@ -51,8 +61,9 @@ export default function SubjectPage() {
     downloadMutation.mutate(resourceId);
   };
 
-  const notesResources = resources?.filter(r => r.resourceType === "notes") || [];
-  const pyqResources = resources?.filter(r => r.resourceType === "pyqs") || [];
+  const resourcesArray = Array.isArray(resources) ? resources : [];
+  const notesResources = resourcesArray.filter(r => r.resourceType === "notes");
+  const pyqResources = resourcesArray.filter(r => r.resourceType === "pyqs");
 
   if (subjectLoading || resourcesLoading) {
     return (
@@ -239,21 +250,7 @@ export default function SubjectPage() {
               </Card>
             </div>
 
-            {/* Upload Resource for this Subject */}
-            <Card className="mt-8">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Contribute to this Subject</h3>
-                <p className="text-muted-foreground mb-4">
-                  Help fellow students by uploading notes, PYQs, or assignments for {subject.name}
-                </p>
-                <Link href="/upload">
-                  <Button className="inline-flex items-center space-x-2" data-testid="button-upload-resource">
-                    <Plus className="h-4 w-4" />
-                    <span>Upload Resource</span>
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+
 
             {/* Navigation */}
             <div className="mt-8">

@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Bell, Search, User } from "lucide-react";
+import { User } from "lucide-react";
 import { Link } from "wouter";
 
 export function Header() {
@@ -17,38 +17,22 @@ export function Header() {
   };
 
   return (
-    <header className="bg-card border-b border-border px-6 py-4">
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center space-x-4">
-          <Link href="/" className="text-2xl font-bold text-primary" data-testid="link-header-logo">
-            FreeSource.ig
+    <header className="bg-card border-b border-border px-4 py-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-6">
+          <Link href="/" className="flex items-center space-x-2 text-2xl font-bold text-primary" data-testid="link-header-logo">
+            <i className="fas fa-lightbulb" />
+            <span>ResourceHub</span>
           </Link>
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground ml-2">
             <i className="fas fa-home" />
             <span>Dashboard</span>
           </div>
         </div>
         
         <div className="flex items-center space-x-4">
-          {/* Search Bar */}
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Search resources..."
-              className="pl-10 pr-4 py-2 w-64"
-              data-testid="input-header-search"
-            />
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          </div>
-          
           {/* User Menu */}
           <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="sm" className="relative p-2" data-testid="button-header-notifications">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground rounded-full text-xs w-5 h-5 flex items-center justify-center">
-                3
-              </span>
-            </Button>
             <Link 
               href="/profile" 
               className="flex items-center space-x-2 cursor-pointer hover:bg-muted rounded-md p-2 transition-colors"

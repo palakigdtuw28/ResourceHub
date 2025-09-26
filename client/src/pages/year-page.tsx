@@ -10,20 +10,8 @@ export default function YearPage() {
   const yearNumber = parseInt(year || "1");
 
   const semesterData = [
-    { 
-      semester: 1, 
-      subjects: 6, 
-      resources: 124, 
-      notes: 67, 
-      pyqs: 57 
-    },
-    { 
-      semester: 2, 
-      subjects: 6, 
-      resources: 98, 
-      notes: 53, 
-      pyqs: 45 
-    },
+    { semester: 1 },
+    { semester: 2 },
   ];
 
   return (
@@ -67,17 +55,9 @@ export default function YearPage() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-xl font-semibold mb-2">Semester {semester.semester}</h3>
-                          <p className="text-muted-foreground mb-2">
-                            {semester.subjects} Subjects • {semester.resources} Resources
+                          <p className="text-muted-foreground mb-4">
+                            Access subjects and resources for this semester
                           </p>
-                          <div className="flex space-x-2">
-                            <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded">
-                              Notes: {semester.notes}
-                            </span>
-                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">
-                              PYQs: {semester.pyqs}
-                            </span>
-                          </div>
                         </div>
                         <ChevronRight className="text-muted-foreground h-5 w-5" />
                       </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth-local";
+import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { useForm } from "react-hook-form";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+import { localDB } from "@/lib/localDB";
 
 interface UploadFormData {
   title: string;
@@ -28,12 +28,10 @@ interface UploadFormData {
   agreeToTerms: boolean;
 }
 
-export default function UploadPage() {
+export default function UploadPageLocal() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
 
   const form = useForm<UploadFormData>({
     defaultValues: {
@@ -49,74 +47,48 @@ export default function UploadPage() {
     },
   });
 
-  const watchedYear = form.watch("year");
-  const watchedSemester = form.watch("semester");
-
-  // No longer need to fetch subjects since we're creating them
-
   const uploadMutation = useMutation({
     mutationFn: async (data: UploadFormData) => {
+      if (!user || !data.file) {
+        throw new Error("User not logged in or no file selected");
+      }
+
       // First create the subject
-      const subjectData = {
+      const subject = await localDB.createSubject({
         name: data.subjectName,
         code: data.subjectCode,
         year: data.year,
         semester: data.semester,
-        branch: user?.branch || "CSE",
+        branch: user.branch,
         icon: "fas fa-book"
-      };
-
-      const subjectResponse = await fetch("/api/subjects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(subjectData),
-        credentials: "include",
       });
 
-      if (!subjectResponse.ok) {
-        const error = await subjectResponse.text();
-        throw new Error(error || "Failed to create subject");
-      }
+      // Convert file to base64
+      const fileData = await localDB.fileToBase64(data.file);
 
-      const subject = await subjectResponse.json();
-
-      // Then upload the resource
-      const formData = new FormData();
-      formData.append("title", data.title);
-      formData.append("description", data.description || "");
-      formData.append("subjectId", subject.id);
-      formData.append("resourceType", data.resourceType);
-      if (data.file) {
-        formData.append("file", data.file);
-      }
-
-      const response = await fetch("/api/resources", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
+      // Then create the resource
+      const resource = await localDB.createResource({
+        title: data.title,
+        description: data.description || "",
+        fileName: data.file.name,
+        fileSize: data.file.size,
+        fileType: data.file.type,
+        resourceType: data.resourceType,
+        subjectId: subject.id,
+        uploadedBy: user.id,
+        fileData: fileData
       });
 
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || "Upload failed");
-      }
-
-      return response.json();
+      return { subject, resource };
     },
     onSuccess: () => {
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ["/api/resources/user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/subjects"] });
-      
       toast({
         title: "Subject created and resource uploaded",
         description: "Your new subject and resource have been created successfully.",
       });
       setLocation("/");
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Upload failed",
         description: error.message,
@@ -165,7 +137,7 @@ export default function UploadPage() {
           <div className="fade-in">
             <div className="mb-8">
               <h2 className="text-3xl font-bold mb-2" data-testid="text-upload-title">Create Subject & Upload Resource</h2>
-              <p className="text-muted-foreground">Create a new subject and upload your first resource for it</p>
+              <p className="text-muted-foreground">Create a new subject and upload your first resource for it (No Server Required!)</p>
             </div>
 
             <div className="max-w-2xl">
@@ -179,9 +151,6 @@ export default function UploadPage() {
                           onValueChange={(value) => {
                             const year = parseInt(value);
                             form.setValue("year", year);
-                            setSelectedYear(year);
-                            form.setValue("subjectName", ""); // Reset subject fields
-                            form.setValue("subjectCode", ""); // Reset subject fields
                           }}
                         >
                           <SelectTrigger data-testid="select-upload-year">
@@ -201,9 +170,6 @@ export default function UploadPage() {
                           onValueChange={(value) => {
                             const semester = parseInt(value);
                             form.setValue("semester", semester);
-                            setSelectedSemester(semester);
-                            form.setValue("subjectName", ""); // Reset subject fields
-                            form.setValue("subjectCode", ""); // Reset subject fields
                           }}
                         >
                           <SelectTrigger data-testid="select-upload-semester">
@@ -289,15 +255,17 @@ export default function UploadPage() {
                       />
                     </div>
 
-                    {/* File Upload Area */}
                     <div>
                       <Label>Upload File</Label>
                       <FileUpload
                         onFileSelect={(file) => form.setValue("file", file)}
-                        accept=".pdf,.doc,.docx,.ppt,.pptx"
-                        maxSize={100 * 1024 * 1024} // 100MB
+                        accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.png"
+                        maxSize={100 * 1024 * 1024} // 100MB for local storage
                         data-testid="file-upload-area"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Files are stored in your browser's local storage. Max size: 100MB
+                      </p>
                     </div>
 
                     <div className="flex items-center space-x-2">

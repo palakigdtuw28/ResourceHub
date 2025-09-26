@@ -8,10 +8,7 @@ export function Sidebar() {
   const { user, logoutMutation } = useAuth();
   const [location] = useLocation();
 
-  const { data: stats } = useQuery({
-    queryKey: ["/api/stats", user?.id],
-    enabled: !!user?.id,
-  });
+
 
   const isActive = (path: string) => {
     if (path === "/" && location === "/") return true;
@@ -24,8 +21,8 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-card border-r border-border min-h-screen p-6">
-      <nav className="space-y-2">
+    <aside className="w-64 bg-card border-r border-border min-h-screen p-6 flex flex-col">
+      <nav className="space-y-2 flex-1">
         <Link href="/">
           <Button 
             variant={isActive("/") ? "default" : "ghost"}
@@ -48,16 +45,25 @@ export function Sidebar() {
           </Button>
         </Link>
         
-        <Link href="/upload">
-          <Button 
-            variant={isActive("/upload") ? "default" : "ghost"}
-            className="w-full justify-start"
-            data-testid="nav-upload"
-          >
-            <Upload className="mr-3 h-4 w-4" />
-            Upload Resource
-          </Button>
-        </Link>
+        {user?.isAdmin && (
+          <Link href="/upload">
+            <Button 
+              variant={isActive("/upload") ? "default" : "ghost"}
+              className="w-full justify-start"
+              data-testid="nav-upload"
+            >
+              <Upload className="mr-3 h-4 w-4" />
+              Upload Resource
+            </Button>
+          </Link>
+        )}
+        
+        {/* Credits */}
+        <div style={{ paddingTop: '12px', paddingBottom: '8px', borderTop: '1px solid #e5e5e5', marginTop: '12px' }}>
+          <p style={{ fontSize: '11px', color: '#666', textAlign: 'left', margin: 0 }}>
+            made by @palakigdtuw28
+          </p>
+        </div>
         
         <Button 
           variant="ghost"
@@ -70,28 +76,6 @@ export function Sidebar() {
           {logoutMutation.isPending ? "Logging out..." : "Logout"}
         </Button>
       </nav>
-
-      <div className="mt-8">
-        <h3 className="text-sm font-medium text-muted-foreground mb-4">Quick Stats</h3>
-        <div className="space-y-3">
-          <div className="bg-muted rounded-md p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Downloads</span>
-              <span className="text-lg font-semibold text-accent" data-testid="stat-downloads">
-                {stats?.downloads || 0}
-              </span>
-            </div>
-          </div>
-          <div className="bg-muted rounded-md p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Uploads</span>
-              <span className="text-lg font-semibold text-primary" data-testid="stat-uploads">
-                {stats?.uploads || 0}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }
