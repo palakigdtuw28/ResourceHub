@@ -15,6 +15,13 @@ build/
 .env.test.local
 .env.production.local
 
+# Admin credentials and sensitive files
+ADMIN-CREDENTIALS.md
+admin-credentials.*
+production-secrets.*
+*.key
+*.pem
+
 # Database files (commented out to include sample database)
 # *.db
 # *.db-shm
