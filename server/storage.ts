@@ -29,6 +29,7 @@ export interface IStorage {
   updateUserPassword(id: string, hashedPassword: string): Promise<void>;
 
   getSubjects(year: number, semester: number, branch?: string): Promise<Subject[]>;
+  getAllSubjects(): Promise<Subject[]>;
   getSubject(id: string): Promise<Subject | undefined>;
   createSubject(subject: InsertSubject): Promise<Subject>;
   updateSubject(id: string, updateData: Partial<InsertSubject>): Promise<Subject | undefined>;
@@ -109,6 +110,12 @@ export class DatabaseStorage implements IStorage {
         eq(subjects.semester, semester),
         eq(subjects.branch, branch)
       ));
+  }
+
+  async getAllSubjects(): Promise<Subject[]> {
+    return await db
+      .select()
+      .from(subjects);
   }
 
   async getSubject(id: string): Promise<Subject | undefined> {

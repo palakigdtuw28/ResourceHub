@@ -59,6 +59,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Subject routes
+  // Get all subjects (for admin/upload purposes)
+  app.get("/api/subjects", async (req, res) => {
+    try {
+      const subjects = await storage.getAllSubjects();
+      res.json(subjects);
+    } catch (error) {
+      console.error("Error fetching all subjects:", error);
+      res.status(500).json({ message: "Failed to fetch subjects" });
+    }
+  });
+
   app.get("/api/subjects/:year/:semester", async (req, res) => {
     try {
       const year = parseInt(req.params.year);
