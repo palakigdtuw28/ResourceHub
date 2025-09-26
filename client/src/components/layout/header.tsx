@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { Link } from "wouter";
+import { MobileMenu } from "./mobile-menu";
 
 export function Header() {
   const { user } = useAuth();
@@ -17,10 +18,11 @@ export function Header() {
   };
 
   return (
-    <header className="bg-card border-b border-border px-4 py-4">
+    <header className="bg-card border-b border-border px-4 py-3 md:py-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3 md:space-x-6">
-          <Link href="/" className="flex items-center space-x-2 text-xl md:text-2xl font-bold text-primary" data-testid="link-header-logo">
+        <div className="flex items-center space-x-2 md:space-x-6">
+          <MobileMenu />
+          <Link href="/" className="flex items-center space-x-2 text-lg md:text-2xl font-bold text-primary" data-testid="link-header-logo">
             <i className="fas fa-lightbulb" />
             <span className="hidden sm:inline">ResourceHub</span>
             <span className="sm:hidden">RH</span>

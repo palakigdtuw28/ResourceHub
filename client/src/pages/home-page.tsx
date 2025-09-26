@@ -23,18 +23,20 @@ export default function HomePage() {
               <p className="text-muted-foreground text-sm md:text-base">Choose your year and semester to access resources</p>
             </div>
 
-            {/* Mobile Navigation - Only visible on mobile */}
-            <div className="md:hidden mb-6 grid grid-cols-2 gap-3">
-              <Link href="/profile" className="bg-primary/10 text-primary p-3 rounded-lg text-center font-medium">
-                <i className="fas fa-user mb-1 block" />
-                Profile
-              </Link>
-              {user?.isAdmin && (
-                <Link href="/upload" className="bg-accent/10 text-accent p-3 rounded-lg text-center font-medium">
-                  <i className="fas fa-upload mb-1 block" />
-                  Upload
+            {/* Mobile Quick Actions - Only visible on mobile */}
+            <div className="md:hidden mb-6">
+              <div className="grid grid-cols-2 gap-3">
+                <Link href="/profile" className="bg-primary/10 text-primary p-4 rounded-lg text-center font-medium hover:bg-primary/20 transition-colors">
+                  <i className="fas fa-user mb-2 block text-lg" />
+                  <span className="text-sm">Profile</span>
                 </Link>
-              )}
+                {user?.isAdmin && (
+                  <Link href="/upload" className="bg-accent/10 text-accent p-4 rounded-lg text-center font-medium hover:bg-accent/20 transition-colors">
+                    <i className="fas fa-upload mb-2 block text-lg" />
+                    <span className="text-sm">Upload</span>
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* Year Selection Grid */}

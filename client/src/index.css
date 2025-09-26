@@ -107,6 +107,53 @@ body {
   color: var(--foreground);
 }
 
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  /* Ensure proper touch targets */
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Prevent horizontal scrolling */
+  body, html {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  /* Improve text readability on mobile */
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+  }
+  
+  /* Better mobile container */
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Mobile-friendly cards */
+  .card {
+    border-radius: 8px;
+  }
+  
+  /* Ensure mobile navigation works */
+  nav {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Force refresh cache - mobile fix v2.0 */
+.mobile-optimized {
+  content: "v2.0";
+}
+
 .fade-in {
   animation: fadeIn 0.5s ease-in;
 }
