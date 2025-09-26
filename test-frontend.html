@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Tests</title>
+    <style>
+        .success { color: green; }
+        .error { color: red; }
+        .pending { color: orange; }
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-group { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>CampusVault Frontend Tests</h1>
+    <div id="status"></div>
+    <div id="results"></div>
+
+    <script>
+        const BASE_URL = 'http://localhost:5000';
+        let adminCookies = '';
+        let userCookies = '';
+
+        function updateStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = isError ? 'error' : 'pending';
+        }
+
+        function addResult(title, result, details = '') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = 'test-group';
+            div.innerHTML = `
+                <h3>${title}</h3>
+                <p class="${result ? 'success' : 'error'}">
+                    ${result ? '✅ Passed' : '❌ Failed'}
+                    ${details ? `<br>${details}` : ''}
+                </p>
+            `;
+            results.appendChild(div);
+        }
+
+        async function testAuth(credentials) {
+            try {
+                const response = await fetch(`${BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(credentials)
+                });
+
+                return {
+                    success: response.status === 200,
+                    status: response.status,
+                    data: await response.json().catch(() => null)
+                };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testProtectedRoute(path, cookies) {
+            try {
+                const response = await fetch(`${BASE_URL}${path}`, {
+                    headers: { 'Cookie': cookies },
+                    credentials: 'include'
+                });
+
+                return {
+                    success: response.status === 200,
+                    status: response.status,
+                    data: await response.json().catch(() => null)
+                };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function runTests() {
+            // Test Admin Login
+            updateStatus('Testing admin login...');
+            const adminLogin = await testAuth({
+                username: 'admin_test',
+                password: 'admin123'
+            });
+            addResult('Admin Login', adminLogin.success, 
+                adminLogin.success ? 'Logged in successfully' : `Failed: ${adminLogin.status}`);
+
+            if (adminLogin.success) {
+                // Test Admin Features
+                updateStatus('Testing admin features...');
+                
+                const adminRoutes = [
+                    '/api/user',
+                    '/api/subjects/2/1',
+                    '/api/users'
+                ];
+
+                for (const route of adminRoutes) {
+                    const result = await testProtectedRoute(route, adminCookies);
+                    addResult(`Admin Route: ${route}`, result.success,
+                        result.success ? 'Access granted' : `Status: ${result.status}`);
+                }
+            }
+
+            // Test Regular User Login
+            updateStatus('Testing regular user login...');
+            const userLogin = await testAuth({
+                username: 'user_test',
+                password: 'user123'
+            });
+            addResult('User Login', userLogin.success,
+                userLogin.success ? 'Logged in successfully' : `Failed: ${userLogin.status}`);
+
+            if (userLogin.success) {
+                // Test User Features
+                updateStatus('Testing user features...');
+                
+                const userRoutes = [
+                    '/api/user',
+                    '/api/subjects/2/1'
+                ];
+
+                for (const route of userRoutes) {
+                    const result = await testProtectedRoute(route, userCookies);
+                    addResult(`User Route: ${route}`, result.success,
+                        result.success ? 'Access granted' : `Status: ${result.status}`);
+                }
+            }
+
+            updateStatus('All tests completed!', false);
+        }
+
+        // Start tests
+        runTests().catch(error => {
+            updateStatus(`Test error: ${error.message}`, true);
+        });
+    </script>
+</body>
+</html>

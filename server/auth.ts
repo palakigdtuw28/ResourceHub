@@ -22,10 +22,27 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  try {
+    const [hashed, salt] = stored.split(".");
+    if (!hashed || !salt) {
+      console.error("Invalid stored password format:", stored);
+      return false;
+    }
+    
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    
+    // Ensure both buffers have the same length before comparing
+    if (hashedBuf.length !== suppliedBuf.length) {
+      console.error("Buffer length mismatch:", hashedBuf.length, "vs", suppliedBuf.length);
+      return false;
+    }
+    
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (error) {
+    console.error("Password comparison error:", error);
+    return false;
+  }
 }
 
 export function setupAuth(app: Express) {
@@ -47,11 +64,28 @@ export function setupAuth(app: Express) {
 
   passport.use(
     new LocalStrategy(async (username, password, done) => {
-      const user = await storage.getUserByUsername(username);
-      if (!user || !(await comparePasswords(password, user.password))) {
-        return done(null, false);
-      } else {
+      try {
+        console.log('Login attempt for username:', username);
+        const user = await storage.getUserByUsername(username);
+        
+        if (!user) {
+          console.log('User not found:', username);
+          return done(null, false);
+        }
+        
+        console.log('User found, verifying password...');
+        const isValidPassword = await comparePasswords(password, user.password);
+        
+        if (!isValidPassword) {
+          console.log('Invalid password for user:', username);
+          return done(null, false);
+        }
+        
+        console.log('Login successful for user:', username);
         return done(null, user);
+      } catch (error) {
+        console.error('Login error:', error);
+        return done(error);
       }
     }),
   );
