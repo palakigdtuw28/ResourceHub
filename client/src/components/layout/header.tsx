@@ -19,34 +19,35 @@ export function Header() {
   return (
     <header className="bg-card border-b border-border px-4 py-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-6">
-          <Link href="/" className="flex items-center space-x-2 text-2xl font-bold text-primary" data-testid="link-header-logo">
+        <div className="flex items-center space-x-3 md:space-x-6">
+          <Link href="/" className="flex items-center space-x-2 text-xl md:text-2xl font-bold text-primary" data-testid="link-header-logo">
             <i className="fas fa-lightbulb" />
-            <span>ResourceHub</span>
+            <span className="hidden sm:inline">ResourceHub</span>
+            <span className="sm:hidden">RH</span>
           </Link>
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground ml-2">
+          <div className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground ml-2">
             <i className="fas fa-home" />
             <span>Dashboard</span>
           </div>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4">
           {/* User Menu */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 md:space-x-3">
             <Link 
               href="/profile" 
-              className="flex items-center space-x-2 cursor-pointer hover:bg-muted rounded-md p-2 transition-colors"
+              className="flex items-center space-x-1 md:space-x-2 cursor-pointer hover:bg-muted rounded-md p-1 md:p-2 transition-colors"
               data-testid="link-header-profile"
             >
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">
+              <div className="w-6 h-6 md:w-8 md:h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium text-xs md:text-sm">
                 <span data-testid="text-header-user-initials">
                   {user?.fullName ? getInitials(user.fullName) : 'U'}
                 </span>
               </div>
-              <span className="font-medium" data-testid="text-header-username">
+              <span className="hidden sm:block font-medium text-sm md:text-base" data-testid="text-header-username">
                 {user?.fullName || 'User'}
               </span>
-              <i className="fas fa-chevron-down text-xs" />
+              <i className="hidden md:inline fas fa-chevron-down text-xs" />
             </Link>
           </div>
         </div>

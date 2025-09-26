@@ -120,10 +120,10 @@ export default function SemesterPage() {
         <Header />
         <div className="flex">
           <Sidebar />
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-3 md:p-6">
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
+                <div key={i} className="h-24 md:h-32 bg-muted animate-pulse rounded-lg" />
               ))}
             </div>
           </main>
@@ -137,10 +137,10 @@ export default function SemesterPage() {
       <Header />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-3 md:p-6">
           <div className="fade-in">
             {/* Breadcrumb */}
-            <div className="flex items-center space-x-2 mb-6 text-sm text-muted-foreground">
+            <div className="flex items-center space-x-1 md:space-x-2 mb-4 md:mb-6 text-xs md:text-sm text-muted-foreground overflow-x-auto">
               <Home className="h-4 w-4" />
               <Link href="/" className="hover:text-foreground">Dashboard</Link>
               <ChevronRight className="h-4 w-4" />

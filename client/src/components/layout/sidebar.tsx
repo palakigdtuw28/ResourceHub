@@ -21,7 +21,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-card border-r border-border min-h-screen p-6 flex flex-col">
+    <aside className="hidden md:block w-64 bg-card border-r border-border min-h-screen p-6 flex-col">
       <nav className="space-y-2 flex-1">
         <Link href="/">
           <Button 
