@@ -15,11 +15,11 @@ export function MobileMenu() {
   };
 
   return (
-    <div className="md:hidden">
+    <div className="md:hidden flex-shrink-0">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="sm" className="p-2">
-            <Menu className="h-5 w-5" />
+          <Button variant="ghost" size="sm" className="p-2 h-8 w-8">
+            <Menu className="h-4 w-4" />
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-64">

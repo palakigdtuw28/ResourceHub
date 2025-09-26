@@ -121,31 +121,64 @@ body {
     touch-action: manipulation;
   }
   
-  /* Prevent horizontal scrolling */
+  /* Prevent horizontal scrolling and UI merging */
   body, html {
     overflow-x: hidden;
     width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Fix flex containers on mobile */
+  .flex {
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+  
+  /* Prevent text from overflowing */
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
   /* Improve text readability on mobile */
   h1, h2, h3, h4, h5, h6 {
     line-height: 1.2;
+    word-wrap: break-word;
   }
   
   /* Better mobile container */
   .min-h-screen {
     min-height: 100vh;
     min-height: -webkit-fill-available;
+    width: 100%;
   }
   
   /* Mobile-friendly cards */
   .card {
     border-radius: 8px;
+    margin-bottom: 0.5rem;
   }
   
   /* Ensure mobile navigation works */
   nav {
     -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Fix header spacing on mobile */
+  header {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  /* Prevent grid items from overlapping */
+  .grid {
+    gap: 0.75rem;
   }
 }
 
