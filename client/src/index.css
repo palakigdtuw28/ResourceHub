@@ -182,9 +182,58 @@ body {
   }
 }
 
-/* Force refresh cache - mobile fix v2.0 */
+/* Force refresh cache - mobile fix v3.0 */
 .mobile-optimized {
-  content: "v2.0";
+  content: "v3.0";
+}
+
+/* Additional mobile fixes for profile and dashboard */
+@media (max-width: 768px) {
+  /* Fix profile page specific issues */
+  .profile-form .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Fix dashboard card layout */
+  .dashboard-grid .grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  @media (min-width: 640px) and (max-width: 768px) {
+    .dashboard-grid .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  /* Improve card content spacing */
+  .card-content {
+    padding: 1rem;
+  }
+  
+  /* Fix text overflow in cards */
+  .card h3, .card h2 {
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  /* Better button spacing on mobile */
+  .mobile-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Ensure forms don't overflow */
+  form {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Fix input field sizing */
+  input, select, textarea {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 .fade-in {

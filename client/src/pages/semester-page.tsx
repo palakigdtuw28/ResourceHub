@@ -153,15 +153,15 @@ export default function SemesterPage() {
               </span>
             </div>
 
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-2" data-testid="text-semester-title">
+            <div className="mb-6 md:mb-8">
+              <h2 className="text-xl md:text-3xl font-bold mb-2 leading-tight" data-testid="text-semester-title">
                 {yearNumber}{getOrdinalSuffix(yearNumber)} Year - Semester {semesterNumber}
               </h2>
-              <p className="text-muted-foreground">Browse subjects and download resources</p>
+              <p className="text-muted-foreground text-sm md:text-base">Browse subjects and download resources</p>
             </div>
 
             {/* Subjects Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8 w-full overflow-hidden">
               {Array.isArray(subjects) && subjects.length === 0 ? (
                 <div className="col-span-full text-center py-12 text-muted-foreground">
                   <p>No subjects found for this semester.</p>
@@ -170,12 +170,12 @@ export default function SemesterPage() {
               ) : (
                 Array.isArray(subjects) &&
                 subjects.map((subject) => (
-                  <Link key={subject.id} href={`/subject/${subject.id}`} className="block">
-                    <Card className="h-full hover:shadow-lg transition-all cursor-pointer" data-testid={`card-subject-${subject.id}`}>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <Link key={subject.id} href={`/subject/${subject.id}`} className="block w-full">
+                    <Card className="h-full hover:shadow-lg transition-all cursor-pointer w-full" data-testid={`card-subject-${subject.id}`}>
+                      <CardContent className="p-4 md:p-6">
+                        <div className="flex items-center justify-between mb-3 md:mb-4">
+                          <div className="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
+                            <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                               {getSubjectIcon(subject.name)}
                             </div>
                             <div>

@@ -212,25 +212,25 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="flex">
+      <div className="flex w-full">
         <Sidebar />
-        <main className="flex-1 p-6">
-          <div className="fade-in">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-2" data-testid="text-profile-title">My Profile</h2>
-              <p className="text-muted-foreground">
+        <main className="flex-1 w-full min-w-0 p-3 md:p-6">
+          <div className="fade-in max-w-full">
+            <div className="mb-6 md:mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold mb-2 leading-tight" data-testid="text-profile-title">My Profile</h2>
+              <p className="text-muted-foreground text-sm md:text-base">
                 {user?.isAdmin ? "Manage your account settings and uploaded resources" : "Manage your account settings"}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 w-full">
               {/* Profile Info */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-4 md:space-y-6 w-full">
                 <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-4">Profile Information</h3>
+                  <CardContent className="p-4 md:p-6">
+                    <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Profile Information</h3>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                         <div>
                           <Label htmlFor="fullName">Full Name</Label>
                           <Input
@@ -301,8 +301,8 @@ export default function ProfilePage() {
                 {/* My Resources - Only for Admin Users */}
                 {user?.isAdmin && (
                   <Card>
-                    <CardContent className="p-6">
-                      <h3 className="text-xl font-semibold mb-4">My Uploaded Resources</h3>
+                    <CardContent className="p-4 md:p-6">
+                      <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">My Uploaded Resources</h3>
                       <div className="space-y-3">
                         {resourcesLoading ? (
                           <div className="space-y-3">
@@ -376,11 +376,11 @@ export default function ProfilePage() {
               </div>
 
               {/* Quick Actions Sidebar */}
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6 w-full">
                 <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-4">Account Info</h3>
-                    <div className="space-y-4">
+                  <CardContent className="p-4 md:p-6">
+                    <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Account Info</h3>
+                    <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">Member Since</span>
                         <span className="font-medium" data-testid="text-member-since">
@@ -398,8 +398,8 @@ export default function ProfilePage() {
                 </Card>
 
                 <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
+                  <CardContent className="p-4 md:p-6">
+                    <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Quick Actions</h3>
                     <div className="space-y-3">
                       <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
                         <DialogTrigger asChild>

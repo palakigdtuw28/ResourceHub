@@ -40,22 +40,22 @@ export default function HomePage() {
             </div>
 
             {/* Year Selection Grid */}
-            <div className="w-full">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+            <div className="w-full overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
                 {years.map((year) => (
                   <Link 
                     key={year} 
                     href={`/year/${year}`}
-                    className="block"
+                    className="block w-full"
                     data-testid={`link-year-${year}`}
                   >
-                    <Card className="h-full hover:shadow-lg transition-all cursor-pointer">
+                    <Card className="h-full hover:shadow-lg transition-all cursor-pointer w-full">
                       <CardContent className="p-4 md:p-6 text-center">
-                        <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                        <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4">
                           <span className="text-lg md:text-2xl font-bold text-primary">{year}</span>
                         </div>
-                        <h3 className="text-lg md:text-xl font-semibold mb-2">{year}{getOrdinalSuffix(year)} Year</h3>
-                        <p className="text-muted-foreground text-sm">
+                        <h3 className="text-base md:text-xl font-semibold mb-1 md:mb-2 leading-tight">{year}{getOrdinalSuffix(year)} Year</h3>
+                        <p className="text-muted-foreground text-xs md:text-sm leading-relaxed">
                           {year === 1 ? "Foundation Courses" :
                            year === 2 ? "Core Subjects" :
                            year === 3 ? "Advanced Topics" :
