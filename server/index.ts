@@ -2,6 +2,8 @@ import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { eq } from "drizzle-orm";
+import * as schema from "@shared/schema";
 
 const app = express();
   app.use(express.json({ limit: '100mb' }));
@@ -74,6 +76,16 @@ app.use((req, res, next) => {
     await setupVite(app, server);
   } else {
     serveStatic(app);
+  }
+
+  // Run branch migration on startup (one-time fix)
+  try {
+    log('Running branch migration...');
+    const { db } = await import('./db');
+    const result = await db.update(schema.subjects).set({ branch: 'CSE' }).where(eq(schema.subjects.branch, 'Computer Science'));
+    log(`Branch migration completed: updated ${result.changes || 0} subjects`);
+  } catch (error) {
+    log('Branch migration failed:', String(error));
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
