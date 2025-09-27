@@ -79,13 +79,18 @@ app.use((req, res, next) => {
   }
 
   // Run branch migration on startup (one-time fix)
+  log('🔄 Starting branch migration process...');
   try {
-    log('Running branch migration...');
-    const { storage } = await import('./storage');
+    log('📥 Importing storage module...');
+    const storageModule = await import('./storage');
+    const storage = storageModule.storage;
+    
+    log('🏃‍♂️ Executing fixSubjectBranches...');
     const result = await storage.fixSubjectBranches();
-    log(`✅ Branch migration completed: updated ${result.changes} subjects from 'Computer Science' to 'CSE'`);
+    log(`✅ Branch migration SUCCESS: Updated ${result.changes} subjects from 'Computer Science' to 'CSE'`);
   } catch (error) {
-    log('❌ Branch migration failed:', String(error));
+    log('❌ Branch migration FAILED:', String(error));
+    console.error('Full migration error:', error);
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
