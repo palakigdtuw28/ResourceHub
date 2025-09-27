@@ -9,6 +9,16 @@ startCommand = "npm start"
 healthcheckPath = "/api/health"
 restartPolicyType = "always"
 
+# Persistent storage for uploaded files and database
+[[volumes]]
+source = "uploads"
+destination = "/app/uploads"
+
+[[volumes]]
+source = "data"
+destination = "/app/data"
+
 [env]
 NODE_ENV = "production"
 PORT = "5000"
+DATABASE_URL = "/app/data/campusvault.db"
