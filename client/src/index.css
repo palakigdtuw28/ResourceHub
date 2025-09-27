@@ -10,11 +10,22 @@
   display: none !important;
 }
 
-/* Hide AI messages and clean interface cards */
+/* Hide AI messages and clean interface cards - AGGRESSIVE */
 h3:contains("Clean Interface Active"), 
 .card:has(h3:contains("Clean Interface Active")),
-.card:has(h3:contains("🎯 Clean Interface Active")) {
+.card:has(h3:contains("🎯 Clean Interface Active")),
+.card:has(h3:contains("🎯")),
+div:contains("Clean Interface Active"),
+div:contains("🎯 Clean Interface Active"),
+div:contains("notifications and activity tracking"),
+div:contains("distraction-free experience"),
+*:contains("Clean Interface Active"),
+*:contains("🎯 Clean Interface Active") {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }
 
 :root {
@@ -187,11 +198,56 @@ body {
   .grid {
     gap: 0.75rem;
   }
+  
+  /* Fix main layout issues on mobile */
+  main {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0.75rem !important;
+  }
+  
+  /* Fix sidebar and header on mobile */
+  .flex {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Ensure no horizontal overflow */
+  .flex-1 {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  
+  /* Fix card widths on mobile */
+  .card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 0.75rem 0 !important;
+  }
+  
+  /* Fix text wrapping */
+  h2, h3, p {
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+  
+  /* Fix year selection grid on mobile */
+  .grid-cols-1 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Force mobile layout */
+  @media (max-width: 640px) {
+    .sm\:grid-cols-2 {
+      grid-template-columns: 1fr !important;
+    }
+  }
 }
 
-/* Force refresh cache - mobile fix v3.3 */
+/* Force refresh cache - mobile fix v3.4-AGGRESSIVE */
 .mobile-optimized {
-  content: "v3.3";
+  content: "v3.4-AGGRESSIVE";
 }
 
 /* Additional mobile fixes for profile and dashboard */
@@ -245,7 +301,7 @@ body {
   /* Force mobile UI refresh */
   .mobile-refresh-trigger {
     display: none;
-    content: "v3.3-dashboard-cleanup";
+    content: "v3.4-AGGRESSIVE-MOBILE-FIX";
   }
 }
 
