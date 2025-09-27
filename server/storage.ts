@@ -31,9 +31,11 @@ export interface IStorage {
   getSubjects(year: number, semester: number, branch?: string): Promise<Subject[]>;
   getAllSubjects(): Promise<Subject[]>;
   getSubject(id: string): Promise<Subject | undefined>;
+  findExistingSubject(name: string, code: string, year: number, semester: number, branch: string): Promise<Subject | undefined>;
   createSubject(subject: InsertSubject): Promise<Subject>;
   updateSubject(id: string, updateData: Partial<InsertSubject>): Promise<Subject | undefined>;
   deleteSubject(id: string): Promise<boolean>;
+  cleanupDuplicateSubjects(): Promise<{ removed: number; kept: number }>;
 
   getResources(subjectId: string, resourceType?: string): Promise<Resource[]>;
   getResource(id: string): Promise<Resource | undefined>;
@@ -123,7 +125,38 @@ export class DatabaseStorage implements IStorage {
     return subject;
   }
 
+  async findExistingSubject(name: string, code: string, year: number, semester: number, branch: string): Promise<Subject | undefined> {
+    const [subject] = await db
+      .select()
+      .from(subjects)
+      .where(
+        and(
+          eq(subjects.name, name),
+          eq(subjects.code, code),
+          eq(subjects.year, year),
+          eq(subjects.semester, semester),
+          eq(subjects.branch, branch)
+        )
+      );
+    return subject;
+  }
+
   async createSubject(subject: InsertSubject): Promise<Subject> {
+    // Check if subject already exists (with fallback for undefined branch)
+    const subjectBranch = subject.branch || "CSE";
+    const existing = await this.findExistingSubject(
+      subject.name,
+      subject.code,
+      subject.year,
+      subject.semester,
+      subjectBranch
+    );
+
+    if (existing) {
+      // Return existing subject instead of creating duplicate
+      return existing;
+    }
+
     const [newSubject] = await db
       .insert(subjects)
       .values(subject)
@@ -150,6 +183,67 @@ export class DatabaseStorage implements IStorage {
       return result.changes > 0;
     } catch (error) {
       console.error("Error in deleteSubject:", error);
+      throw error;
+    }
+  }
+
+  async cleanupDuplicateSubjects(): Promise<{ removed: number; kept: number }> {
+    try {
+      // Get all subjects
+      const allSubjects = await db.select().from(subjects);
+      
+      // Group subjects by unique key (name + code + year + semester + branch)
+      const subjectGroups: { [key: string]: Subject[] } = {};
+      
+      allSubjects.forEach(subject => {
+        const key = `${subject.name}-${subject.code}-${subject.year}-${subject.semester}-${subject.branch}`;
+        if (!subjectGroups[key]) {
+          subjectGroups[key] = [];
+        }
+        subjectGroups[key].push(subject);
+      });
+
+      let removedCount = 0;
+      let keptCount = 0;
+
+      // For each group, keep the first one and remove the rest
+      for (const [key, duplicates] of Object.entries(subjectGroups)) {
+        if (duplicates.length > 1) {
+          // Sort by creation date (keep the oldest one)
+          duplicates.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateA - dateB;
+          });
+          
+          const keepSubject = duplicates[0];
+          const removeSubjects = duplicates.slice(1);
+          
+          // Move resources from duplicate subjects to the kept subject
+          for (const removeSubject of removeSubjects) {
+            // Update resources to point to the kept subject
+            await db
+              .update(resources)
+              .set({ subjectId: keepSubject.id })
+              .where(eq(resources.subjectId, removeSubject.id));
+            
+            // Delete the duplicate subject
+            await db
+              .delete(subjects)
+              .where(eq(subjects.id, removeSubject.id));
+            
+            removedCount++;
+          }
+          
+          keptCount++;
+        } else {
+          keptCount++;
+        }
+      }
+
+      return { removed: removedCount, kept: keptCount };
+    } catch (error) {
+      console.error("Error cleaning up duplicate subjects:", error);
       throw error;
     }
   }

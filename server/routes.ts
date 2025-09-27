@@ -132,6 +132,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cleanup duplicate subjects route
+  app.post("/api/subjects/cleanup-duplicates", requireAdmin, async (req, res) => {
+    try {
+      const result = await storage.cleanupDuplicateSubjects();
+      res.json({
+        message: "Duplicate subjects cleaned up successfully",
+        removed: result.removed,
+        kept: result.kept
+      });
+    } catch (error) {
+      console.error("Error cleaning up duplicate subjects:", error);
+      res.status(500).json({ message: "Failed to cleanup duplicate subjects" });
+    }
+  });
+
   app.delete("/api/subjects/:id", requireAdmin, async (req, res) => {
     try {
       const subjectId = req.params.id;
