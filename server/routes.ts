@@ -326,16 +326,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      // Delete the physical file
-      const fileName = (resource as any).fileName || (resource as any).file_name;
-      if (fileName) {
-        const filePath = path.join(uploadDir, fileName);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      }
-      
-      // Delete from database
+    // Delete the physical file
+    const filePath = path.join(uploadDir, `${resourceId}${resource.fileType}`);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }      // Delete from database
       await storage.deleteResource(resourceId);
       
       res.json({ message: "Resource deleted successfully" });
