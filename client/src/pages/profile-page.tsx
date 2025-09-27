@@ -214,50 +214,51 @@ export default function ProfilePage() {
       <Header />
       <div className="flex w-full">
         <Sidebar />
-        <main className="flex-1 w-full min-w-0 p-3 md:p-6">
-          <div className="fade-in max-w-full">
+        <main className="flex-1 w-full min-w-0 p-4 md:p-6">
+          <div className="fade-in max-w-7xl mx-auto">
             <div className="mb-6 md:mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold mb-2 leading-tight" data-testid="text-profile-title">My Profile</h2>
-              <p className="text-muted-foreground text-sm md:text-base">
+              <h2 className="text-2xl md:text-3xl font-bold mb-2" data-testid="text-profile-title">My Profile</h2>
+              <p className="text-muted-foreground">
                 {user?.isAdmin ? "Manage your account settings and uploaded resources" : "Manage your account settings"}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
               {/* Profile Info */}
-              <div className="lg:col-span-2 space-y-4 md:space-y-6 w-full">
-                <Card>
-                  <CardContent className="p-4 md:p-6">
-                    <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Profile Information</h3>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                        <div>
-                          <Label htmlFor="fullName">Full Name</Label>
+              <div className="lg:col-span-2 space-y-6">
+                <Card className="shadow-sm">
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-6">Profile Information</h3>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="fullName" className="text-sm font-medium">Full Name</Label>
                           <Input
                             id="fullName"
                             {...form.register("fullName")}
                             data-testid="input-profile-fullname"
+                            className="h-10"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="email">Email</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                           <Input
                             id="email"
                             value={user.email}
                             disabled
-                            className="bg-muted"
+                            className="bg-muted h-10"
                             data-testid="input-profile-email"
                           />
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="year">Year</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="year" className="text-sm font-medium">Year</Label>
                           <Select 
                             value={form.watch("year")?.toString()} 
                             onValueChange={(value) => form.setValue("year", parseInt(value))}
                           >
-                            <SelectTrigger data-testid="select-profile-year">
+                            <SelectTrigger data-testid="select-profile-year" className="h-10">
                               <SelectValue placeholder={`${user.year}${getOrdinalSuffix(user.year)} Year`} />
                             </SelectTrigger>
                             <SelectContent>
@@ -268,13 +269,13 @@ export default function ProfilePage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div>
-                          <Label htmlFor="branch">Branch</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="branch" className="text-sm font-medium">Branch</Label>
                           <Select 
                             value={form.watch("branch")} 
                             onValueChange={(value) => form.setValue("branch", value)}
                           >
-                            <SelectTrigger data-testid="select-profile-branch">
+                            <SelectTrigger data-testid="select-profile-branch" className="h-10">
                               <SelectValue placeholder={user.branch} />
                             </SelectTrigger>
                             <SelectContent>
@@ -287,13 +288,16 @@ export default function ProfilePage() {
                           </Select>
                         </div>
                       </div>
-                      <Button 
-                        type="submit" 
-                        disabled={updateProfileMutation.isPending}
-                        data-testid="button-update-profile"
-                      >
-                        {updateProfileMutation.isPending ? "Updating..." : "Update Profile"}
-                      </Button>
+                      <div className="pt-4">
+                        <Button 
+                          type="submit" 
+                          disabled={updateProfileMutation.isPending}
+                          data-testid="button-update-profile"
+                          className="w-full md:w-auto"
+                        >
+                          {updateProfileMutation.isPending ? "Updating..." : "Update Profile"}
+                        </Button>
+                      </div>
                     </form>
                   </CardContent>
                 </Card>
@@ -376,20 +380,20 @@ export default function ProfilePage() {
               </div>
 
               {/* Quick Actions Sidebar */}
-              <div className="space-y-4 md:space-y-6 w-full">
-                <Card>
-                  <CardContent className="p-4 md:p-6">
-                    <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Account Info</h3>
-                    <div className="space-y-3 md:space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Member Since</span>
-                        <span className="font-medium" data-testid="text-member-since">
+              <div className="space-y-6">
+                <Card className="shadow-sm">
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-4">Account Info</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-muted-foreground text-sm">Member Since</span>
+                        <span className="font-medium text-sm" data-testid="text-member-since">
                           {user.createdAt ? formatMemberSince(user.createdAt) : "Recently"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Branch</span>
-                        <span className="font-medium text-primary">
+                      <div className="flex items-center justify-between py-2 border-t">
+                        <span className="text-muted-foreground text-sm">Branch</span>
+                        <span className="font-medium text-primary text-sm">
                           {user.branch || "Not Set"}
                         </span>
                       </div>
@@ -397,9 +401,9 @@ export default function ProfilePage() {
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardContent className="p-4 md:p-6">
-                    <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Quick Actions</h3>
+                <Card className="shadow-sm">
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
                     <div className="space-y-3">
                       <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
                         <DialogTrigger asChild>

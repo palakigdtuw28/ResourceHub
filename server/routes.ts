@@ -229,7 +229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/resources", requireAdmin, upload.single('file'), async (req, res) => {
+  app.post("/api/resources", requireAuth, upload.single('file'), async (req, res) => {
     try {
       console.log("Upload request received:", {
         hasFile: !!req.file,

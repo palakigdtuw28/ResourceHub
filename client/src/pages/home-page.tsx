@@ -23,9 +23,9 @@ export default function HomePage() {
               <p className="text-muted-foreground text-sm md:text-base leading-relaxed">Choose your year and semester to access resources</p>
             </div>
 
-            {/* Year Selection Grid */}
+            {/* Year Selection Grid - maintains desktop-like alignment on mobile */}
             <div className="w-full overflow-hidden">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
                 {years.map((year) => (
                   <Link 
                     key={year} 
@@ -33,13 +33,13 @@ export default function HomePage() {
                     className="block w-full"
                     data-testid={`link-year-${year}`}
                   >
-                    <Card className="h-full hover:shadow-lg transition-all cursor-pointer w-full">
-                      <CardContent className="p-4 md:p-6 text-center">
-                        <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4">
+                    <Card className="h-full hover:shadow-lg transition-all cursor-pointer w-full min-h-[140px] md:min-h-[160px]">
+                      <CardContent className="p-4 md:p-6 text-center h-full flex flex-col justify-center">
+                        <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 flex-shrink-0">
                           <span className="text-lg md:text-2xl font-bold text-primary">{year}</span>
                         </div>
-                        <h3 className="text-base md:text-xl font-semibold mb-1 md:mb-2 leading-tight">{year}{getOrdinalSuffix(year)} Year</h3>
-                        <p className="text-muted-foreground text-xs md:text-sm leading-relaxed">
+                        <h3 className="text-base md:text-xl font-semibold mb-2 md:mb-2 leading-tight flex-shrink-0">{year}{getOrdinalSuffix(year)} Year</h3>
+                        <p className="text-muted-foreground text-xs md:text-sm leading-relaxed flex-1">
                           {year === 1 ? "Foundation Courses" :
                            year === 2 ? "Core Subjects" :
                            year === 3 ? "Advanced Topics" :
