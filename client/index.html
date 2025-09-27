@@ -13,41 +13,95 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Force remove AI messages after DOM loads
+      // AGGRESSIVE AI message removal
       function removeAIMessages() {
         setTimeout(() => {
-          const elementsToRemove = [
-            ...document.querySelectorAll('h3:contains("Clean Interface Active")'),
-            ...document.querySelectorAll('h3:contains("🎯")'),
-            ...Array.from(document.querySelectorAll('h3')).filter(el => el.textContent.includes('Clean Interface Active')),
-            ...Array.from(document.querySelectorAll('h3')).filter(el => el.textContent.includes('🎯')),
-            ...Array.from(document.querySelectorAll('p')).filter(el => el.textContent.includes('notifications and activity tracking')),
-            ...Array.from(document.querySelectorAll('p')).filter(el => el.textContent.includes('distraction-free experience')),
-            ...Array.from(document.querySelectorAll('div')).filter(el => el.textContent.includes('Clean Interface Active'))
+          // Find all elements containing AI message text
+          const selectors = [
+            'h3', 'h2', 'h4', 'p', 'div', 'span', 'section', 'article', 'main'
           ];
           
-          elementsToRemove.forEach(el => {
-            const card = el.closest('.card') || el.closest('[class*="card"]');
-            if (card) {
-              card.style.display = 'none';
-              card.remove();
-            } else {
+          const searchTerms = [
+            'Clean Interface Active',
+            '🎯 Clean Interface Active', 
+            '🎯',
+            'notifications and activity tracking',
+            'distraction-free experience',
+            'This version has notifications',
+            'activity tracking completely removed',
+            'cleaner, distraction-free'
+          ];
+          
+          selectors.forEach(selector => {
+            const elements = Array.from(document.querySelectorAll(selector));
+            elements.forEach(el => {
+              const text = el.textContent || '';
+              const hasAIMessage = searchTerms.some(term => text.includes(term));
+              
+              if (hasAIMessage) {
+                // Find parent card or container
+                let parent = el.closest('.card') || 
+                           el.closest('[class*="card"]') || 
+                           el.closest('[class*="Card"]') ||
+                           el.parentElement;
+                
+                if (parent && parent !== document.body) {
+                  parent.style.display = 'none';
+                  parent.style.visibility = 'hidden';
+                  parent.style.opacity = '0';
+                  parent.style.height = '0';
+                  parent.style.overflow = 'hidden';
+                  parent.remove();
+                } else {
+                  el.style.display = 'none';
+                  el.style.visibility = 'hidden';
+                  el.style.opacity = '0';
+                  el.remove();
+                }
+              }
+            });
+          });
+          
+          // Additional cleanup - remove any remaining elements with specific classes
+          const classesToRemove = [
+            '[class*="clean-interface"]',
+            '[class*="ai-message"]',
+            '[data-ai="true"]'
+          ];
+          
+          classesToRemove.forEach(classSelector => {
+            document.querySelectorAll(classSelector).forEach(el => {
               el.style.display = 'none';
               el.remove();
-            }
+            });
           });
-        }, 100);
+          
+        }, 50);
       }
       
-      // Run on page load
+      // Run immediately
+      removeAIMessages();
+      
+      // Run on DOM ready
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', removeAIMessages);
       } else {
         removeAIMessages();
       }
       
-      // Also run periodically for dynamic content
-      setInterval(removeAIMessages, 2000);
+      // Run on route changes and content updates
+      const observer = new MutationObserver(() => {
+        removeAIMessages();
+      });
+      
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: false
+      });
+      
+      // Run periodically as backup
+      setInterval(removeAIMessages, 1000);
     </script>
   </body>
 </html>

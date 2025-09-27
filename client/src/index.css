@@ -243,11 +243,43 @@ body {
       grid-template-columns: 1fr !important;
     }
   }
+  
+  /* Profile page specific mobile fixes */
+  .grid-cols-1.lg\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .md\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Fix profile form inputs */
+  input, select {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+    max-width: 100% !important;
+  }
+  
+  /* Fix profile card padding */
+  .card .p-4 {
+    padding: 0.75rem !important;
+  }
+  
+  /* Fix profile text sizes */
+  h2, h3 {
+    font-size: 1.25rem !important;
+    line-height: 1.4 !important;
+  }
+  
+  /* Fix profile button sizes */
+  .button {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
 }
 
-/* Force refresh cache - mobile fix v3.4-AGGRESSIVE */
+/* Force refresh cache - mobile fix v3.5-PROFILE-FIX */
 .mobile-optimized {
-  content: "v3.4-AGGRESSIVE";
+  content: "v3.5-PROFILE-FIX";
 }
 
 /* Additional mobile fixes for profile and dashboard */
@@ -301,7 +333,7 @@ body {
   /* Force mobile UI refresh */
   .mobile-refresh-trigger {
     display: none;
-    content: "v3.4-AGGRESSIVE-MOBILE-FIX";
+    content: "v3.5-PROFILE-MOBILE-FIX";
   }
 }
 
