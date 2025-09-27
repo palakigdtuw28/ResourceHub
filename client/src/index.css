@@ -188,7 +188,30 @@ body {
     -webkit-overflow-scrolling: touch;
   }
   
-
+  /* Fix header alignment on mobile - keep items in same line */
+  header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-direction: row !important;
+    padding: 0.75rem !important;
+    min-height: 60px !important;
+  }
+  
+  /* Ensure header flex items stay in line */
+  header .flex {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+  }
+  
+  /* Fix ResourceHub title alignment */
+  header h1, header .text-xl {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
   
   /* Prevent grid items from overlapping */
   .grid {
@@ -348,4 +371,4 @@ body {
   }
 }
 /* Cache refresh timestamp: 2025-09-27 10:21:40 */
-/* HEADER ALIGNMENT FIX - v3.5.1 */
+/* HEADER MOBILE ALIGNMENT FIX - v3.5.2 */
