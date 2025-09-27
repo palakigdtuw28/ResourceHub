@@ -10,6 +10,13 @@
   display: none !important;
 }
 
+/* Hide AI messages and clean interface cards */
+h3:contains("Clean Interface Active"), 
+.card:has(h3:contains("Clean Interface Active")),
+.card:has(h3:contains("🎯 Clean Interface Active")) {
+  display: none !important;
+}
+
 :root {
   --background: hsl(210, 40%, 98%);
   --foreground: hsl(210, 40%, 8%);
@@ -182,9 +189,9 @@ body {
   }
 }
 
-/* Force refresh cache - mobile fix v3.2 */
+/* Force refresh cache - mobile fix v3.3 */
 .mobile-optimized {
-  content: "v3.2";
+  content: "v3.3";
 }
 
 /* Additional mobile fixes for profile and dashboard */
@@ -238,7 +245,7 @@ body {
   /* Force mobile UI refresh */
   .mobile-refresh-trigger {
     display: none;
-    content: "v3.2-force-update";
+    content: "v3.3-dashboard-cleanup";
   }
 }
 
