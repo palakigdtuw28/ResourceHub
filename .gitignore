@@ -18,6 +18,9 @@ build/
 # Admin credentials and sensitive files
 ADMIN-CREDENTIALS.md
 admin-credentials.*
+
+# Backups (user data - should not be committed)
+backups/
 production-secrets.*
 *.key
 *.pem
