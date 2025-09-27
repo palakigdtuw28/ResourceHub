@@ -56,7 +56,7 @@ export default function UploadPage() {
 
   const uploadMutation = useMutation({
     mutationFn: async (data: UploadFormData) => {
-      // First create the subject
+      // First check if subject already exists
       const subjectData = {
         name: data.subjectName,
         code: data.subjectCode,
@@ -66,21 +66,61 @@ export default function UploadPage() {
         icon: "fas fa-book"
       };
 
-      const subjectResponse = await fetch("/api/subjects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(subjectData),
+      // Try to find existing subject first
+      const existingSubjectsResponse = await fetch(`/api/subjects/${data.year}/${data.semester}?branch=${user?.branch || "CSE"}`, {
         credentials: "include",
       });
 
-      if (!subjectResponse.ok) {
-        const error = await subjectResponse.text();
-        throw new Error(error || "Failed to create subject");
-      }
+      let subject;
+      
+      if (existingSubjectsResponse.ok) {
+        const existingSubjects = await existingSubjectsResponse.json();
+        const existingSubject = existingSubjects.find((s: any) => 
+          s.name === data.subjectName && s.code === data.subjectCode
+        );
+        
+        if (existingSubject) {
+          // Use existing subject
+          subject = existingSubject;
+          subject.isNewSubject = false;
+        } else {
+          // Create new subject
+          const subjectResponse = await fetch("/api/subjects", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(subjectData),
+            credentials: "include",
+          });
 
-      const subject = await subjectResponse.json();
+          if (!subjectResponse.ok) {
+            const error = await subjectResponse.text();
+            throw new Error(error || "Failed to create subject");
+          }
+
+          subject = await subjectResponse.json();
+          subject.isNewSubject = true;
+        }
+      } else {
+        // Fallback: create new subject
+        const subjectResponse = await fetch("/api/subjects", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(subjectData),
+          credentials: "include",
+        });
+
+        if (!subjectResponse.ok) {
+          const error = await subjectResponse.text();
+          throw new Error(error || "Failed to create subject");
+        }
+
+        subject = await subjectResponse.json();
+        subject.isNewSubject = true;
+      }
 
       // Then upload the resource
       const formData = new FormData();
@@ -103,16 +143,19 @@ export default function UploadPage() {
         throw new Error(error || "Upload failed");
       }
 
-      return response.json();
+      const uploadResult = await response.json();
+      return { ...uploadResult, isNewSubject: subject.isNewSubject };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/resources/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/subjects"] });
       
       toast({
-        title: "Subject created and resource uploaded",
-        description: "Your new subject and resource have been created successfully.",
+        title: "Resource uploaded successfully",
+        description: result.isNewSubject 
+          ? "New subject created and resource uploaded." 
+          : "Resource added to existing subject.",
       });
       setLocation("/");
     },
@@ -164,8 +207,8 @@ export default function UploadPage() {
         <main className="flex-1 p-6">
           <div className="fade-in">
             <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-2" data-testid="text-upload-title">Create Subject & Upload Resource</h2>
-              <p className="text-muted-foreground">Create a new subject and upload your first resource for it</p>
+              <h2 className="text-3xl font-bold mb-2" data-testid="text-upload-title">Upload Resource</h2>
+              <p className="text-muted-foreground">Upload a resource to an existing subject or create a new subject</p>
             </div>
 
             <div className="max-w-2xl">
