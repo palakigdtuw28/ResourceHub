@@ -182,9 +182,9 @@ body {
   }
 }
 
-/* Force refresh cache - mobile fix v3.1 */
+/* Force refresh cache - mobile fix v3.2 */
 .mobile-optimized {
-  content: "v3.1";
+  content: "v3.2";
 }
 
 /* Additional mobile fixes for profile and dashboard */
@@ -233,6 +233,12 @@ body {
   input, select, textarea {
     width: 100%;
     max-width: 100%;
+  }
+  
+  /* Force mobile UI refresh */
+  .mobile-refresh-trigger {
+    display: none;
+    content: "v3.2-force-update";
   }
 }
 
