@@ -51,17 +51,6 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
-
-            {/* Clean Dashboard - No Activity Tracking */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">🎯 Clean Interface Active</h3>
-                <p className="text-muted-foreground">
-                  Browse and access your academic resources by selecting a year above. 
-                  This version has notifications and activity tracking completely removed for a cleaner, distraction-free experience.
-                </p>
-              </CardContent>
-            </Card>
           </div>
         </main>
       </div>
