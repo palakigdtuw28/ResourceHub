@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { verifyToken } from "./storage";
 import { setupAuth } from "./auth";
 import { insertResourceSchema, insertSubjectSchema, insertDownloadSchema } from "@shared/schema";
 import multer from "multer";
@@ -365,22 +366,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/download/:resourceId", requireAuth, async (req, res) => {
     try {
+      // Try cookie-based authentication first
+      let user = req.user;
+      // If not present, check for Bearer token in Authorization header
+      if (!user && req.headers.authorization) {
+        const token = req.headers.authorization.replace('Bearer ', '');
+        user = await verifyToken(token);
+      }
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
       const resourceId = req.params.resourceId;
       const resource = await storage.getResource(resourceId);
-      
+
       if (!resource) {
         return res.status(404).json({ message: "Resource not found" });
       }
 
       const filePath = path.join(uploadDir, `${resourceId}${resource.fileType}`);
-      
+
       if (!fs.existsSync(filePath)) {
         return res.status(404).json({ message: "File not found" });
       }
 
       // Record the download
       await storage.createDownload({
-        userId: (req.user as any).id,
+        userId: user.id,
         resourceId: resourceId,
       });
       await storage.incrementDownloadCount(resourceId);

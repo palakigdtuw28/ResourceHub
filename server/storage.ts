@@ -1,3 +1,22 @@
+// JWT token verification for download route fallback
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "changeme";
+
+/**
+ * Verifies a JWT token and returns the user object if valid, else null.
+ * @param {string} token
+ * @returns {Promise<any>} user object or null
+ */
+export async function verifyToken(token: string): Promise<any> {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    // You may want to fetch user from DB here for extra safety
+    return decoded;
+  } catch (err) {
+    return null;
+  }
+}
 import { 
   users, 
   subjects, 
