@@ -22,10 +22,9 @@ export function Header() {
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center space-x-2 md:space-x-6 flex-1 min-w-0">
           <MobileMenu />
-          <Link href="/" className="flex items-center space-x-1 md:space-x-2 text-lg md:text-2xl font-bold text-primary truncate" data-testid="link-header-logo">
-            <i className="fas fa-lightbulb flex-shrink-0" />
-            <span className="hidden sm:inline">ResourceHub</span>
-            <span className="sm:hidden">RH</span>
+          <Link href="/" className="flex items-center space-x-2 text-lg md:text-2xl font-bold text-primary" data-testid="link-header-logo">
+            <i className="fas fa-lightbulb flex-shrink-0 text-primary" />
+            <span className="text-lg md:text-2xl">ResourceHub</span>
           </Link>
           <div className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground ml-2">
             <i className="fas fa-home" />
