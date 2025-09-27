@@ -127,7 +127,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async findExistingSubject(name: string, code: string, year: number, semester: number, branch: string): Promise<Subject | undefined> {
-    const [subject] = await db
+    // Try exact match first
+    let [subject] = await db
       .select()
       .from(subjects)
       .where(
@@ -139,6 +140,23 @@ export class DatabaseStorage implements IStorage {
           eq(subjects.branch, branch)
         )
       );
+
+    // If no exact match and branch is CSE, also try "Computer Science" for backward compatibility
+    if (!subject && branch === 'CSE') {
+      [subject] = await db
+        .select()
+        .from(subjects)
+        .where(
+          and(
+            eq(subjects.name, name),
+            eq(subjects.code, code),
+            eq(subjects.year, year),
+            eq(subjects.semester, semester),
+            eq(subjects.branch, 'Computer Science')
+          )
+        );
+    }
+
     return subject;
   }
 
@@ -251,13 +269,26 @@ export class DatabaseStorage implements IStorage {
 
   async fixSubjectBranches(): Promise<{ changes: number }> {
     try {
+      // First, run duplicate cleanup to merge similar subjects
+      await this.cleanupDuplicateSubjects();
+      
+      // Then update branch names
       const result = await db
         .update(subjects)
         .set({ branch: 'CSE' })
         .where(eq(subjects.branch, 'Computer Science'));
       
       console.log(`Branch migration: updated ${result.changes} subjects from 'Computer Science' to 'CSE'`);
-      return { changes: result.changes };
+      
+      // Also update MAE branch to CSE if needed (since we saw MAE in the duplicates)
+      const maeResult = await db
+        .update(subjects)
+        .set({ branch: 'CSE' })
+        .where(eq(subjects.branch, 'MAE'));
+      
+      console.log(`Branch migration: updated ${maeResult.changes} subjects from 'MAE' to 'CSE'`);
+      
+      return { changes: result.changes + maeResult.changes };
     } catch (error) {
       console.error("Error in branch migration:", error);
       throw error;

@@ -66,18 +66,45 @@ export default function UploadPage() {
         icon: "fas fa-book"
       };
 
-      // Try to find existing subject first
-      const existingSubjectsResponse = await fetch(`/api/subjects/${data.year}/${data.semester}?branch=${user?.branch || "CSE"}`, {
-        credentials: "include",
-      });
+      // Try to find existing subject first - check both branch names to handle migration
+      const branches = [user?.branch || "CSE", "Computer Science"];
+      let existingSubjects = [];
+      
+      for (const branch of branches) {
+        const existingSubjectsResponse = await fetch(`/api/subjects/${data.year}/${data.semester}?branch=${branch}`, {
+          credentials: "include",
+        });
+        
+        if (existingSubjectsResponse.ok) {
+          const branchSubjects = await existingSubjectsResponse.json();
+          existingSubjects.push(...branchSubjects);
+        }
+      }
 
       let subject;
       
-      if (existingSubjectsResponse.ok) {
-        const existingSubjects = await existingSubjectsResponse.json();
-        const existingSubject = existingSubjects.find((s: any) => 
-          s.name === data.subjectName && s.code === data.subjectCode
+      if (existingSubjects.length > 0) {
+        // Try exact match first
+        let existingSubject = existingSubjects.find((s: any) => 
+          s.name.toLowerCase() === data.subjectName.toLowerCase() && 
+          s.code.toLowerCase() === data.subjectCode.toLowerCase()
         );
+        
+        // If no exact match, try partial name match for similar subjects (like "DBMS" vs "Database Systems")
+        if (!existingSubject) {
+          existingSubject = existingSubjects.find((s: any) => {
+            const subjectNameLower = data.subjectName.toLowerCase();
+            const existingNameLower = s.name.toLowerCase();
+            
+            // Check if names contain common keywords
+            const keywords = ['database', 'dbms', 'data', 'management', 'system'];
+            const hasCommonKeyword = keywords.some(keyword => 
+              subjectNameLower.includes(keyword) && existingNameLower.includes(keyword)
+            );
+            
+            return hasCommonKeyword && s.year === data.year && s.semester === data.semester;
+          });
+        }
         
         if (existingSubject) {
           // Use existing subject
