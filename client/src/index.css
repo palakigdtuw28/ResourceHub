@@ -188,11 +188,7 @@ body {
     -webkit-overflow-scrolling: touch;
   }
   
-  /* Fix header spacing on mobile */
-  header {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-  }
+
   
   /* Prevent grid items from overlapping */
   .grid {
@@ -206,7 +202,7 @@ body {
     padding: 0.75rem !important;
   }
   
-  /* Fix sidebar and header on mobile */
+  /* Fix sidebar layout on mobile */
   .flex {
     display: flex !important;
     flex-direction: column !important;
@@ -352,4 +348,4 @@ body {
   }
 }
 /* Cache refresh timestamp: 2025-09-27 10:21:40 */
-/* FORCE DEPLOYMENT UPDATE - v3.5 */
+/* HEADER ALIGNMENT FIX - v3.5.1 */
