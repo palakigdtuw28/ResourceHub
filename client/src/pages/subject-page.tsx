@@ -67,8 +67,9 @@ export default function SubjectPage() {
   const notesResources = resourcesArray.filter(r => r.resourceType === "notes");
   const pyqResources = resourcesArray.filter(r => r.resourceType === "pyqs");
 
-  // State to control expanded notes view
+  // State to control expanded notes and pyqs view
   const [showAllNotes, setShowAllNotes] = useState(false);
+  const [showAllPyqs, setShowAllPyqs] = useState(false);
 
   if (subjectLoading || resourcesLoading) {
     return (
@@ -230,7 +231,7 @@ export default function SubjectPage() {
                         No PYQs available yet.
                       </p>
                     ) : (
-                      pyqResources.slice(0, 3).map((resource) => (
+                      (showAllPyqs ? pyqResources : pyqResources.slice(0, 3)).map((resource) => (
                         <div key={resource.id} className="flex items-center justify-between p-3 bg-muted rounded-md">
                           <div className="flex items-center space-x-3">
                             <i className="fas fa-file-pdf text-red-500" />
@@ -260,10 +261,14 @@ export default function SubjectPage() {
                         </div>
                       ))
                     )}
-                    
                     {pyqResources.length > 3 && (
-                      <Button variant="ghost" className="w-full" data-testid="button-view-all-pyqs">
-                        View All PYQs ({pyqResources.length})
+                      <Button 
+                        variant="ghost" 
+                        className="w-full" 
+                        data-testid="button-view-all-pyqs"
+                        onClick={() => setShowAllPyqs((prev) => !prev)}
+                      >
+                        {showAllPyqs ? `Show Less` : `View All PYQs (${pyqResources.length})`}
                       </Button>
                     )}
                   </div>
