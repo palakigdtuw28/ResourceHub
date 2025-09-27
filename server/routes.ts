@@ -270,10 +270,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       fs.renameSync(req.file.path, newPath);
 
       console.log("Upload completed successfully");
+      try {
+        // Persist a short log entry for auditing uploads (helps debug missing uploads)
+        const logLine = `${new Date().toISOString()} | UPLOAD_SUCCESS | id=${resource.id} | subject=${resource.subjectId} | file=${resource.fileName} | uploadedBy=${resource.uploadedBy}\n`;
+        fs.appendFileSync(path.join(uploadDir, 'uploads.log'), logLine);
+      } catch (logErr) {
+        console.error('Failed to write upload log:', logErr);
+      }
       res.status(201).json(resource);
     } catch (error) {
       console.error("Error uploading resource:", error);
       console.error("Error stack:", error instanceof Error ? error.stack : 'Unknown error');
+      try {
+        const errLine = `${new Date().toISOString()} | UPLOAD_ERROR | error=${String(error)} | body=${JSON.stringify(req.body || {})}\n`;
+        fs.appendFileSync(path.join(uploadDir, 'uploads.log'), errLine);
+      } catch (logErr) {
+        console.error('Failed to write upload error log:', logErr);
+      }
       res.status(500).json({ 
         message: "Failed to upload resource", 
         error: error instanceof Error ? error.message : 'Unknown error' 
@@ -421,7 +434,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { currentPassword, newPassword } = req.body;
-      
       if (!currentPassword || !newPassword) {
         return res.status(400).json({ message: "Current password and new password are required" });
       }
@@ -431,41 +443,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-
-      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
-      if (!isCurrentPasswordValid) {
+      const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!passwordMatch) {
         return res.status(400).json({ message: "Current password is incorrect" });
       }
 
       // Hash new password and update
-      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-      await storage.updateUserPassword(userId, hashedNewPassword);
-      
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await storage.updateUserPassword(userId, hashedPassword);
       res.json({ message: "Password updated successfully" });
     } catch (error) {
       console.error("Error updating password:", error);
       res.status(500).json({ message: "Failed to update password" });
     }
-  });
-
-  // Error handling middleware for multer and other errors
-  app.use((error: any, req: any, res: any, next: any) => {
-    if (error instanceof multer.MulterError) {
-      console.error("Multer error:", error);
-      if (error.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ 
-          message: "File too large. Maximum size allowed is 100MB." 
-        });
-      }
-      return res.status(400).json({ 
-        message: `Upload error: ${error.message}` 
-      });
-    }
-    
-    console.error("Unhandled error:", error);
-    res.status(500).json({ 
-      message: "Internal server error" 
-    });
   });
 
   const httpServer = createServer(app);
