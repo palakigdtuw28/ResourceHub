@@ -366,8 +366,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Delete from database
       console.log(`[DELETE RESOURCE] Deleting from database`);
-      await storage.deleteResource(resourceId);
-      console.log(`[DELETE RESOURCE] Database deletion completed`);      res.json({ message: "Resource deleted successfully" });
+      try {
+        await storage.deleteResource(resourceId);
+        console.log(`[DELETE RESOURCE] Database deletion completed successfully`);
+      } catch (dbError) {
+        console.error(`[DELETE RESOURCE] Database deletion failed:`, dbError);
+        throw dbError; // Re-throw to be caught by outer catch
+      }      res.json({ message: "Resource deleted successfully" });
     } catch (error) {
       console.error("[DELETE RESOURCE] Error deleting resource:", error);
       console.error("[DELETE RESOURCE] Error stack:", error instanceof Error ? error.stack : "No stack trace");

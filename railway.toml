@@ -10,13 +10,11 @@ healthcheckPath = "/api/health"
 restartPolicyType = "always"
 
 # Persistent storage for uploaded files and database
-[[volumes]]
-source = "uploads"
-destination = "/app/uploads"
+[volumes.uploads]
+mountPath = "/app/uploads"
 
-[[volumes]]
-source = "data"
-destination = "/app/data"
+[volumes.data]
+mountPath = "/app/data"
 
 [env]
 NODE_ENV = "production"
