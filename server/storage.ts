@@ -36,6 +36,7 @@ export interface IStorage {
   updateSubject(id: string, updateData: Partial<InsertSubject>): Promise<Subject | undefined>;
   deleteSubject(id: string): Promise<boolean>;
   cleanupDuplicateSubjects(): Promise<{ removed: number; kept: number }>;
+  fixSubjectBranches(): Promise<{ changes: number }>;
 
   getResources(subjectId: string, resourceType?: string): Promise<Resource[]>;
   getResource(id: string): Promise<Resource | undefined>;
@@ -244,6 +245,21 @@ export class DatabaseStorage implements IStorage {
       return { removed: removedCount, kept: keptCount };
     } catch (error) {
       console.error("Error cleaning up duplicate subjects:", error);
+      throw error;
+    }
+  }
+
+  async fixSubjectBranches(): Promise<{ changes: number }> {
+    try {
+      const result = await db
+        .update(subjects)
+        .set({ branch: 'CSE' })
+        .where(eq(subjects.branch, 'Computer Science'));
+      
+      console.log(`Branch migration: updated ${result.changes} subjects from 'Computer Science' to 'CSE'`);
+      return { changes: result.changes };
+    } catch (error) {
+      console.error("Error in branch migration:", error);
       throw error;
     }
   }

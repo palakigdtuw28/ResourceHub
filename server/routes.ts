@@ -147,6 +147,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Branch migration endpoint (one-time fix)
+  app.post("/api/subjects/fix-branches", requireAdmin, async (req, res) => {
+    try {
+      console.log("Starting branch migration from 'Computer Science' to 'CSE'...");
+      
+      // Use raw SQL to update branches
+      const result = await storage.fixSubjectBranches();
+      
+      res.json({
+        message: "Branch migration completed successfully",
+        updated: result.changes
+      });
+    } catch (error) {
+      console.error("Error in branch migration:", error);
+      res.status(500).json({ 
+        message: "Failed to migrate branches",
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+
   app.delete("/api/subjects/:id", requireAdmin, async (req, res) => {
     try {
       const subjectId = req.params.id;
