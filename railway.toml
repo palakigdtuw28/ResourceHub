@@ -19,4 +19,3 @@ mountPath = "/app/data"
 [env]
 NODE_ENV = "production"
 PORT = "5000"
-DATABASE_URL = "/app/data/campusvault.db"
