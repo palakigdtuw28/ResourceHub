@@ -314,43 +314,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const resourceId = req.params.resourceId;
       console.log(`[DELETE RESOURCE] Starting deletion for resource ID: ${resourceId}`);
-      
+
+      // Check authentication details
+      console.log(`[DELETE RESOURCE] req.isAuthenticated():`, req.isAuthenticated());
+      console.log(`[DELETE RESOURCE] req.user:`, req.user);
+
       // Get the resource to check ownership
       const resource = await storage.getResource(resourceId);
       console.log(`[DELETE RESOURCE] Resource found:`, resource ? 'YES' : 'NO');
-      
+
       if (!resource) {
         console.log(`[DELETE RESOURCE] Resource not found: ${resourceId}`);
         return res.status(404).json({ message: "Resource not found" });
       }
-      
+
       // Only allow the resource owner or admin to delete
       const user = req.user as any;
+      if (!user) {
+        console.log(`[DELETE RESOURCE] No user object found in request`);
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
       console.log(`[DELETE RESOURCE] User ID: ${user.id}, User isAdmin: ${user.isAdmin}`);
       console.log(`[DELETE RESOURCE] Resource uploadedBy: ${resource.uploadedBy}`);
-      
+
       if (resource.uploadedBy !== user.id && !user.isAdmin) {
         console.log(`[DELETE RESOURCE] Permission denied for user ${user.id} on resource ${resourceId}`);
         return res.status(403).json({ message: "Forbidden" });
       }
-      
+
+      // Check uploads directory
+      console.log(`[DELETE RESOURCE] uploadDir: ${uploadDir}`);
+      console.log(`[DELETE RESOURCE] uploadDir exists:`, fs.existsSync(uploadDir));
+
       // Delete the physical file
       const filePath = path.join(uploadDir, `${resourceId}${resource.fileType}`);
       console.log(`[DELETE RESOURCE] Attempting to delete file: ${filePath}`);
-      
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        console.log(`[DELETE RESOURCE] File deleted successfully`);
-      } else {
-        console.log(`[DELETE RESOURCE] File not found: ${filePath}`);
+      console.log(`[DELETE RESOURCE] File exists:`, fs.existsSync(filePath));
+
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log(`[DELETE RESOURCE] File deleted successfully`);
+        } else {
+          console.log(`[DELETE RESOURCE] File not found: ${filePath}`);
+        }
+      } catch (fileError) {
+        console.error(`[DELETE RESOURCE] Error deleting file:`, fileError);
+        // Continue with database deletion even if file deletion fails
       }
-      
+
       // Delete from database
       console.log(`[DELETE RESOURCE] Deleting from database`);
       await storage.deleteResource(resourceId);
-      console.log(`[DELETE RESOURCE] Database deletion completed`);
-      
-      res.json({ message: "Resource deleted successfully" });
+      console.log(`[DELETE RESOURCE] Database deletion completed`);      res.json({ message: "Resource deleted successfully" });
     } catch (error) {
       console.error("[DELETE RESOURCE] Error deleting resource:", error);
       console.error("[DELETE RESOURCE] Error stack:", error instanceof Error ? error.stack : "No stack trace");
