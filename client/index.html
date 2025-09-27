@@ -12,5 +12,42 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Force remove AI messages after DOM loads
+      function removeAIMessages() {
+        setTimeout(() => {
+          const elementsToRemove = [
+            ...document.querySelectorAll('h3:contains("Clean Interface Active")'),
+            ...document.querySelectorAll('h3:contains("🎯")'),
+            ...Array.from(document.querySelectorAll('h3')).filter(el => el.textContent.includes('Clean Interface Active')),
+            ...Array.from(document.querySelectorAll('h3')).filter(el => el.textContent.includes('🎯')),
+            ...Array.from(document.querySelectorAll('p')).filter(el => el.textContent.includes('notifications and activity tracking')),
+            ...Array.from(document.querySelectorAll('p')).filter(el => el.textContent.includes('distraction-free experience')),
+            ...Array.from(document.querySelectorAll('div')).filter(el => el.textContent.includes('Clean Interface Active'))
+          ];
+          
+          elementsToRemove.forEach(el => {
+            const card = el.closest('.card') || el.closest('[class*="card"]');
+            if (card) {
+              card.style.display = 'none';
+              card.remove();
+            } else {
+              el.style.display = 'none';
+              el.remove();
+            }
+          });
+        }, 100);
+      }
+      
+      // Run on page load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', removeAIMessages);
+      } else {
+        removeAIMessages();
+      }
+      
+      // Also run periodically for dynamic content
+      setInterval(removeAIMessages, 2000);
+    </script>
   </body>
 </html>
