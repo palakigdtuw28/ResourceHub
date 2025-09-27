@@ -35,15 +35,23 @@ export default function UploadPage() {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
 
+  // Get URL parameters for pre-filling subject details
+  const urlParams = new URLSearchParams(window.location.search);
+  const prefilledSubjectId = urlParams.get('subjectId');
+  const prefilledSubjectName = urlParams.get('subjectName') || "";
+  const prefilledSubjectCode = urlParams.get('subjectCode') || "";
+  const prefilledYear = urlParams.get('year') ? parseInt(urlParams.get('year')!) : user?.year || 1;
+  const prefilledSemester = urlParams.get('semester') ? parseInt(urlParams.get('semester')!) : 1;
+
   const form = useForm<UploadFormData>({
     defaultValues: {
       title: "",
       description: "",
-      year: user?.year || 1,
-      semester: 1,
-      subjectName: "",
-      subjectCode: "",
-      resourceType: "",
+      year: prefilledYear,
+      semester: prefilledSemester,
+      subjectName: prefilledSubjectName,
+      subjectCode: prefilledSubjectCode,
+      resourceType: "notes", // Default to notes when coming from subject page
       file: null,
       agreeToTerms: false,
     },
@@ -56,62 +64,95 @@ export default function UploadPage() {
 
   const uploadMutation = useMutation({
     mutationFn: async (data: UploadFormData) => {
-      // First check if subject already exists
-      const subjectData = {
-        name: data.subjectName,
-        code: data.subjectCode,
-        year: data.year,
-        semester: data.semester,
-        branch: user?.branch || "CSE",
-        icon: "fas fa-book"
-      };
-
-      // Try to find existing subject first - check both branch names to handle migration
-      const branches = [user?.branch || "CSE", "Computer Science"];
-      let existingSubjects = [];
+      let subject;
       
-      for (const branch of branches) {
-        const existingSubjectsResponse = await fetch(`/api/subjects/${data.year}/${data.semester}?branch=${branch}`, {
+      // If we have a pre-selected subject ID (coming from subject page), use it directly
+      if (prefilledSubjectId) {
+        // Fetch the existing subject details
+        const subjectResponse = await fetch(`/api/subject/${prefilledSubjectId}`, {
           credentials: "include",
         });
         
-        if (existingSubjectsResponse.ok) {
-          const branchSubjects = await existingSubjectsResponse.json();
-          existingSubjects.push(...branchSubjects);
-        }
-      }
-
-      let subject;
-      
-      if (existingSubjects.length > 0) {
-        // Try exact match first
-        let existingSubject = existingSubjects.find((s: any) => 
-          s.name.toLowerCase() === data.subjectName.toLowerCase() && 
-          s.code.toLowerCase() === data.subjectCode.toLowerCase()
-        );
-        
-        // If no exact match, try partial name match for similar subjects (like "DBMS" vs "Database Systems")
-        if (!existingSubject) {
-          existingSubject = existingSubjects.find((s: any) => {
-            const subjectNameLower = data.subjectName.toLowerCase();
-            const existingNameLower = s.name.toLowerCase();
-            
-            // Check if names contain common keywords
-            const keywords = ['database', 'dbms', 'data', 'management', 'system'];
-            const hasCommonKeyword = keywords.some(keyword => 
-              subjectNameLower.includes(keyword) && existingNameLower.includes(keyword)
-            );
-            
-            return hasCommonKeyword && s.year === data.year && s.semester === data.semester;
-          });
-        }
-        
-        if (existingSubject) {
-          // Use existing subject
-          subject = existingSubject;
+        if (subjectResponse.ok) {
+          subject = await subjectResponse.json();
           subject.isNewSubject = false;
         } else {
-          // Create new subject
+          throw new Error("Failed to fetch subject details");
+        }
+      } else {
+        // Original logic for finding/creating subjects
+        const subjectData = {
+          name: data.subjectName,
+          code: data.subjectCode,
+          year: data.year,
+          semester: data.semester,
+          branch: user?.branch || "CSE",
+          icon: "fas fa-book"
+        };
+
+        // Try to find existing subject first - check both branch names to handle migration
+        const branches = [user?.branch || "CSE", "Computer Science"];
+        let existingSubjects = [];
+        
+        for (const branch of branches) {
+          const existingSubjectsResponse = await fetch(`/api/subjects/${data.year}/${data.semester}?branch=${branch}`, {
+            credentials: "include",
+          });
+          
+          if (existingSubjectsResponse.ok) {
+            const branchSubjects = await existingSubjectsResponse.json();
+            existingSubjects.push(...branchSubjects);
+          }
+        }
+        
+        if (existingSubjects.length > 0) {
+          // Try exact match first
+          let existingSubject = existingSubjects.find((s: any) => 
+            s.name.toLowerCase() === data.subjectName.toLowerCase() && 
+            s.code.toLowerCase() === data.subjectCode.toLowerCase()
+          );
+          
+          // If no exact match, try partial name match for similar subjects (like "DBMS" vs "Database Systems")
+          if (!existingSubject) {
+            existingSubject = existingSubjects.find((s: any) => {
+              const subjectNameLower = data.subjectName.toLowerCase();
+              const existingNameLower = s.name.toLowerCase();
+              
+              // Check if names contain common keywords
+              const keywords = ['database', 'dbms', 'data', 'management', 'system'];
+              const hasCommonKeyword = keywords.some(keyword => 
+                subjectNameLower.includes(keyword) && existingNameLower.includes(keyword)
+              );
+              
+              return hasCommonKeyword && s.year === data.year && s.semester === data.semester;
+            });
+          }
+          
+          if (existingSubject) {
+            // Use existing subject
+            subject = existingSubject;
+            subject.isNewSubject = false;
+          } else {
+            // Create new subject
+            const subjectResponse = await fetch("/api/subjects", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(subjectData),
+              credentials: "include",
+            });
+
+            if (!subjectResponse.ok) {
+              const error = await subjectResponse.text();
+              throw new Error(error || "Failed to create subject");
+            }
+
+            subject = await subjectResponse.json();
+            subject.isNewSubject = true;
+          }
+        } else {
+          // Fallback: create new subject
           const subjectResponse = await fetch("/api/subjects", {
             method: "POST",
             headers: {
@@ -129,24 +170,6 @@ export default function UploadPage() {
           subject = await subjectResponse.json();
           subject.isNewSubject = true;
         }
-      } else {
-        // Fallback: create new subject
-        const subjectResponse = await fetch("/api/subjects", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(subjectData),
-          credentials: "include",
-        });
-
-        if (!subjectResponse.ok) {
-          const error = await subjectResponse.text();
-          throw new Error(error || "Failed to create subject");
-        }
-
-        subject = await subjectResponse.json();
-        subject.isNewSubject = true;
       }
 
       // Then upload the resource

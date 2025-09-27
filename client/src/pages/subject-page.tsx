@@ -127,18 +127,30 @@ export default function SubjectPage() {
               </span>
             </div>
 
-            <div className="flex items-center space-x-4 mb-8">
-              <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
-                <i className={`${subject.icon || 'fas fa-book'} text-primary text-2xl`} />
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <i className={`${subject.icon || 'fas fa-book'} text-primary text-2xl`} />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold" data-testid="text-subject-title">
+                    {subject.name}
+                  </h2>
+                  <p className="text-muted-foreground" data-testid="text-subject-details">
+                    {subject.code} • {subject.year}{getOrdinalSuffix(subject.year)} Year - Semester {subject.semester}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-3xl font-bold" data-testid="text-subject-title">
-                  {subject.name}
-                </h2>
-                <p className="text-muted-foreground" data-testid="text-subject-details">
-                  {subject.code} • {subject.year}{getOrdinalSuffix(subject.year)} Year - Semester {subject.semester}
-                </p>
-              </div>
+
+              {/* Add Notes Button */}
+              {user?.isAdmin && (
+                <Link href={`/upload?subjectId=${subject.id}&subjectName=${encodeURIComponent(subject.name)}&subjectCode=${encodeURIComponent(subject.code)}&year=${subject.year}&semester=${subject.semester}`}>
+                  <Button className="bg-primary hover:bg-primary/90" data-testid="button-add-notes">
+                    <i className="fas fa-plus mr-2" />
+                    Add Notes
+                  </Button>
+                </Link>
+              )}
             </div>
 
             {/* Resource Categories */}
