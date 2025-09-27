@@ -61,9 +61,13 @@ export default function SubjectPage() {
     downloadMutation.mutate(resourceId);
   };
 
+
   const resourcesArray = Array.isArray(resources) ? resources : [];
   const notesResources = resourcesArray.filter(r => r.resourceType === "notes");
   const pyqResources = resourcesArray.filter(r => r.resourceType === "pyqs");
+
+  // State to control expanded notes view
+  const [showAllNotes, setShowAllNotes] = useState(false);
 
   if (subjectLoading || resourcesLoading) {
     return (
@@ -168,7 +172,7 @@ export default function SubjectPage() {
                         No notes available yet.
                       </p>
                     ) : (
-                      notesResources.slice(0, 3).map((resource) => (
+                      (showAllNotes ? notesResources : notesResources.slice(0, 3)).map((resource) => (
                         <div key={resource.id} className="flex items-center justify-between p-3 bg-muted rounded-md">
                           <div className="flex items-center space-x-3">
                             <i className="fas fa-file-pdf text-red-500" />
@@ -198,10 +202,14 @@ export default function SubjectPage() {
                         </div>
                       ))
                     )}
-                    
                     {notesResources.length > 3 && (
-                      <Button variant="ghost" className="w-full" data-testid="button-view-all-notes">
-                        View All Notes ({notesResources.length})
+                      <Button 
+                        variant="ghost" 
+                        className="w-full" 
+                        data-testid="button-view-all-notes"
+                        onClick={() => setShowAllNotes((prev) => !prev)}
+                      >
+                        {showAllNotes ? `Show Less` : `View All Notes (${notesResources.length})`}
                       </Button>
                     )}
                   </div>
