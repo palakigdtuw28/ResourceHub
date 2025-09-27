@@ -313,29 +313,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/resources/:resourceId", requireAuth, async (req, res) => {
     try {
       const resourceId = req.params.resourceId;
+      console.log(`[DELETE RESOURCE] Starting deletion for resource ID: ${resourceId}`);
       
       // Get the resource to check ownership
       const resource = await storage.getResource(resourceId);
+      console.log(`[DELETE RESOURCE] Resource found:`, resource ? 'YES' : 'NO');
+      
       if (!resource) {
+        console.log(`[DELETE RESOURCE] Resource not found: ${resourceId}`);
         return res.status(404).json({ message: "Resource not found" });
       }
       
       // Only allow the resource owner or admin to delete
       const user = req.user as any;
+      console.log(`[DELETE RESOURCE] User ID: ${user.id}, User isAdmin: ${user.isAdmin}`);
+      console.log(`[DELETE RESOURCE] Resource uploadedBy: ${resource.uploadedBy}`);
+      
       if (resource.uploadedBy !== user.id && !user.isAdmin) {
+        console.log(`[DELETE RESOURCE] Permission denied for user ${user.id} on resource ${resourceId}`);
         return res.status(403).json({ message: "Forbidden" });
       }
       
-    // Delete the physical file
-    const filePath = path.join(uploadDir, `${resourceId}${resource.fileType}`);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }      // Delete from database
+      // Delete the physical file
+      const filePath = path.join(uploadDir, `${resourceId}${resource.fileType}`);
+      console.log(`[DELETE RESOURCE] Attempting to delete file: ${filePath}`);
+      
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        console.log(`[DELETE RESOURCE] File deleted successfully`);
+      } else {
+        console.log(`[DELETE RESOURCE] File not found: ${filePath}`);
+      }
+      
+      // Delete from database
+      console.log(`[DELETE RESOURCE] Deleting from database`);
       await storage.deleteResource(resourceId);
+      console.log(`[DELETE RESOURCE] Database deletion completed`);
       
       res.json({ message: "Resource deleted successfully" });
     } catch (error) {
-      console.error("Error deleting resource:", error);
+      console.error("[DELETE RESOURCE] Error deleting resource:", error);
+      console.error("[DELETE RESOURCE] Error stack:", error instanceof Error ? error.stack : "No stack trace");
       res.status(500).json({ message: "Failed to delete resource" });
     }
   });
